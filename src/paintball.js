@@ -11,7 +11,7 @@ let scale = 60;
 // movement variabled
 let velx = 0;
 let vely = 0;
-let playerSpeed = 4;
+let playerSpeed = 3;
 let movforce = 0.2;
 let movlt = false;
 let movrt = false;
