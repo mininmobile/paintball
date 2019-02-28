@@ -3,6 +3,8 @@ canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
 document.body.appendChild(canvas);
 
+document.body.click();
+
 // render options variable
 let scale = 60;
 
@@ -60,6 +62,8 @@ ctx.font = "1em Arial";
 	ctx.fillStyle = "#161621";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+	let colliding = false;
+
 	{ // calculate player movement
 		velx += movlt ? movforce : -movforce;
 		velx += movrt ? -movforce : movforce;
@@ -94,40 +98,39 @@ ctx.font = "1em Arial";
 		y = Math.round(y + vely);
 	}
 
-	{ // show map
+	{ // show map + calculate map collisions
 		ctx.fillStyle = "#aaa";
 
 		for (let i = 0; i < map.length; i++) {
 			for (let j = 0; j < map[i].length; j++) {
 				if (map[i][j] == 1) {
-					ctx.fillRect(j * scale + x, i * scale + y, scale, scale);
+					let blockx = j * scale + x;
+					let blocky = i * scale + y;
+
+					ctx.fillRect(blockx, blocky, scale, scale);
+
+					let playerx = canvas.width / 2 - scale / 2.5;
+					let playery = canvas.height / 2 - scale / 2.5;
+					let playerw = (scale / 2.5) * 2;
+					let playerh = (scale / 2.5) * 2;
+	
+					if (((playerx > blockx && playerx < blockx + scale) &&
+					     (playery > blocky && playery < blocky + scale)) || 
+					    ((playerx + playerw > blockx && playerx + playerw < blockx + scale) &&
+					     (playery + playerh > blocky && playery + playerh < blocky + scale))) {
+							colliding = true;
+						}
 				}
 			}
 		}
 	}
 
 	// show player
+	ctx.strokeStyle = "#f00";
 	ctx.fillStyle = "#ddd";
 	ctx.beginPath();
-	ctx.ellipse(canvas.width / 2 - scale / 5, canvas.height / 2 - scale / 5, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
+	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
 	ctx.fill();
+	if (colliding) ctx.stroke();
 })();
 
-function isColliding() {
-	let colliding = false;
-
-	for (let i = 0; i < map.length || colliding; i++) {
-		for (let j = 0; j < map[i].length || colliding; j++) {
-			if (map[i][j] == 1) {
-				let blockx = j * scale + x;
-				let blocky = i * scale + y;
-
-				if ((canvas.width / 2 > blockx && canvas.width / 2 < blockx - scale) && (canvas.height / 2 > blocky && canvas.height / 2 < blocky - scale)) {
-					colliding = true;
-				}
-			}
-		}
-	}
-
-	return colliding;
-}
