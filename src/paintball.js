@@ -60,7 +60,7 @@ ctx.font = "1em Arial";
 	ctx.fillStyle = "#161621";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	{ // movement
+	{ // calculate player movement
 		velx += movlt ? movforce : -movforce;
 		velx += movrt ? -movforce : movforce;
 		vely += movup ? movforce : -movforce;
@@ -114,5 +114,20 @@ ctx.font = "1em Arial";
 })();
 
 function isColliding() {
+	let colliding = false;
 
+	for (let i = 0; i < map.length || colliding; i++) {
+		for (let j = 0; j < map[i].length || colliding; j++) {
+			if (map[i][j] == 1) {
+				let blockx = j * scale + x;
+				let blocky = i * scale + y;
+
+				if ((canvas.width / 2 > blockx && canvas.width / 2 < blockx - scale) && (canvas.height / 2 > blocky && canvas.height / 2 < blocky - scale)) {
+					colliding = true;
+				}
+			}
+		}
+	}
+
+	return colliding;
 }
