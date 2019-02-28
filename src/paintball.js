@@ -3,15 +3,19 @@ canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
 document.body.appendChild(canvas);
 
-let x = 0;
-let y = 0;
+let x = canvas.width / 2;
+let y = canvas.height / 2;
+
+let velx = 0;
+let vely = 0;
 
 let playerSpeed = 2;
+let movforce = 0.1;
 
-let movup = false;
-let movdn = false;
 let movlt = false;
 let movrt = false;
+let movup = false;
+let movdn = false;
 
 let map = [
 	[1, 1, 1, 1, 1],
@@ -55,10 +59,37 @@ ctx.font = "1em Arial";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	{ // movement
-		if (movup) y += 1 * playerSpeed;
-		if (movdn) y -= 1 * playerSpeed;
-		if (movlt) x += 1 * playerSpeed;
-		if (movrt) x -= 1 * playerSpeed;
+		velx += movlt ? movforce : -movforce;
+		velx += movrt ? -movforce : movforce;
+		vely += movup ? movforce : -movforce;
+		vely += movdn ? -movforce : movforce;
+
+		if (velx > playerSpeed) velx = playerSpeed;
+		if (velx < -playerSpeed) velx = -playerSpeed;
+		if (vely > playerSpeed) vely = playerSpeed;
+		if (vely < -playerSpeed) vely = -playerSpeed;
+
+		velx = Math.round(velx * 10) / 10;
+		vely = Math.round(vely * 10) / 10;
+
+		if (!movlt && !movrt && velx != 0) {
+			if (velx < 0)
+				velx += movforce;
+			
+			if (velx > 0)
+				velx -= movforce;
+		}
+
+		if (!movup && !movdn && vely != 0) {
+			if (vely < 0)
+				vely += movforce;
+
+			if (vely > 0)
+				vely -= movforce;
+		}
+
+		x = Math.round(x + velx);
+		y = Math.round(y + vely);
 	}
 
 	{ // show map
@@ -75,6 +106,11 @@ ctx.font = "1em Arial";
 
 	// show player
 	ctx.fillStyle = "#ddd";
-	ctx.ellipse(canvas.width / 2 - scale / 4, canvas.height / 2 - scale / 4, scale / 2, scale / 2, 0, 0, Math.PI * 2);
+	ctx.beginPath();
+	ctx.ellipse(canvas.width / 2 - scale / 5, canvas.height / 2 - scale / 5, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
 	ctx.fill();
 })();
+
+function isColliding() {
+
+}
