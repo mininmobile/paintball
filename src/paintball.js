@@ -11,8 +11,8 @@ let scale = 60;
 // movement variabled
 let velx = 0;
 let vely = 0;
-let playerSpeed = 3;
-let movforce = 0.1;
+let playerSpeed = 4;
+let movforce = 0.2;
 let movlt = false;
 let movrt = false;
 let movup = false;
@@ -27,12 +27,38 @@ let lasty = y;
 
 // map variables
 let map = [
-	[1, 1, 1, 1, 1],
-	[1, 0, 0, 0, 1],
-	[1, 1, 1, 0, 1],
-	[1, 0, 0, 0, 1],
-	[1, 1, 1, 1, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
+
+{ // initialize
+	{ // map ignition
+		for (let i = 0; i < map.length; i++) {
+			for (let j = 0; j < map[i].length; j++) {
+				let blockx = j * scale;
+				let blocky = i * scale;
+
+				switch (map[i][j]) {
+					case 2: {
+						x = canvas.width / 2 - blockx - scale / 2;
+						y = canvas.height / 2 - blocky - scale / 2;
+					} break;
+				}
+			}
+		}
+	}
+}
 
 { // controls
 	document.addEventListener("keydown", (e) => {
@@ -104,22 +130,27 @@ ctx.font = "1em Arial";
 	}
 
 	{ // show map
-		ctx.fillStyle = "#aaa";
-
 		for (let i = 0; i < map.length; i++) {
 			for (let j = 0; j < map[i].length; j++) {
-				if (map[i][j] == 1) {
-					let blockx = j * scale + x;
-					let blocky = i * scale + y;
+				let blockx = j * scale + x;
+				let blocky = i * scale + y;
 
-					ctx.fillRect(blockx, blocky, scale, scale);
+				switch (map[i][j]) {
+					case 1: {
+						ctx.fillStyle = "#aaa";
+						ctx.fillRect(blockx, blocky, scale, scale);
+					} break;
+
+					case 2: {
+						ctx.fillStyle = "#0a0";
+						ctx.fillRect(blockx, blocky, scale, scale);
+					} break;
 				}
 			}
 		}
 	}
 
 	// show player
-	ctx.strokeStyle = "#f00";
 	ctx.fillStyle = "#ddd";
 	ctx.beginPath();
 	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
