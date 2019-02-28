@@ -11,7 +11,7 @@ let scale = 60;
 // movement variabled
 let velx = 0;
 let vely = 0;
-let playerSpeed = 2;
+let playerSpeed = 3;
 let movforce = 0.1;
 let movlt = false;
 let movrt = false;
@@ -19,8 +19,11 @@ let movup = false;
 let movdn = false;
 
 // position variables
-let x = canvas.width / 2 - scale * 1.7;
-let y = canvas.height / 2 - scale * 1.7;
+let x = 0;
+let y = 0;
+
+let lastx = x;
+let lasty = y;
 
 // map variables
 let map = [
@@ -62,8 +65,6 @@ ctx.font = "1em Arial";
 	ctx.fillStyle = "#161621";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-	let colliding = false;
-
 	{ // calculate player movement
 		velx += movlt ? movforce : -movforce;
 		velx += movrt ? -movforce : movforce;
@@ -94,11 +95,15 @@ ctx.font = "1em Arial";
 				vely -= movforce;
 		}
 
+		lastx = x;
+		lasty = y;
 		x = Math.round(x + velx);
+		isColliding("x");
 		y = Math.round(y + vely);
+		isColliding("y");
 	}
 
-	{ // show map + calculate map collisions
+	{ // show map
 		ctx.fillStyle = "#aaa";
 
 		for (let i = 0; i < map.length; i++) {
@@ -108,18 +113,6 @@ ctx.font = "1em Arial";
 					let blocky = i * scale + y;
 
 					ctx.fillRect(blockx, blocky, scale, scale);
-
-					let playerx = canvas.width / 2 - scale / 2.5;
-					let playery = canvas.height / 2 - scale / 2.5;
-					let playerw = (scale / 2.5) * 2;
-					let playerh = (scale / 2.5) * 2;
-	
-					if (((playerx > blockx && playerx < blockx + scale) &&
-					     (playery > blocky && playery < blocky + scale)) || 
-					    ((playerx + playerw > blockx && playerx + playerw < blockx + scale) &&
-					     (playery + playerh > blocky && playery + playerh < blocky + scale))) {
-							colliding = true;
-						}
 				}
 			}
 		}
@@ -131,6 +124,28 @@ ctx.font = "1em Arial";
 	ctx.beginPath();
 	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
 	ctx.fill();
-	if (colliding) ctx.stroke();
 })();
 
+function isColliding(d = "b") {
+	for (let i = 0; i < map.length; i++) {
+		for (let j = 0; j < map[i].length; j++) {
+			if (map[i][j] == 1) {
+				let blockx = j * scale + x;
+				let blocky = i * scale + y;
+
+				let playerx = canvas.width / 2 - scale / 2.5;
+				let playery = canvas.height / 2 - scale / 2.5;
+				let playerw = (scale / 2.5) * 2;
+				let playerh = (scale / 2.5) * 2;
+
+				if (((playerx > blockx && playerx < blockx + scale) &&
+					 (playery > blocky && playery < blocky + scale)) || 
+					((playerx + playerw > blockx && playerx + playerw < blockx + scale) &&
+					 (playery + playerh > blocky && playery + playerh < blocky + scale))) {
+						if (d == "b" || d == "x") x -= Math.round(velx);
+						if (d == "b" || d == "y") y -= Math.round(vely);
+					}
+			}
+		}
+	}
+}
