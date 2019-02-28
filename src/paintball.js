@@ -3,20 +3,24 @@ canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
 document.body.appendChild(canvas);
 
-let x = canvas.width / 2;
-let y = canvas.height / 2;
+// render options variable
+let scale = 60;
 
+// movement variabled
 let velx = 0;
 let vely = 0;
-
 let playerSpeed = 2;
 let movforce = 0.1;
-
 let movlt = false;
 let movrt = false;
 let movup = false;
 let movdn = false;
 
+// position variables
+let x = canvas.width / 2 - scale * 1.7;
+let y = canvas.height / 2 - scale * 1.7;
+
+// map variables
 let map = [
 	[1, 1, 1, 1, 1],
 	[1, 0, 0, 0, 1],
@@ -24,8 +28,6 @@ let map = [
 	[1, 0, 0, 0, 1],
 	[1, 1, 1, 1, 1],
 ]
-
-let scale = 60;
 
 { // controls
 	document.addEventListener("keydown", (e) => {
