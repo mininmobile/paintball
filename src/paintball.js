@@ -193,9 +193,6 @@ ctx.font = "1em Arial";
 })();
 
 function isColliding(d = "b", ex, ey, ew, eh) {
-	ctx.strokeStyle = "#f00"
-	ctx.strokeRect(ex, ey, ew, eh);
-
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			if (map[i][j] == 1) {
@@ -222,9 +219,6 @@ function isColliding(d = "b", ex, ey, ew, eh) {
 		let entityy = e.position.y + y;
 		let entityw = e.size.w;
 		let entityh = e.size.h;
-
-		ctx.strokeStyle = "#f00"
-		ctx.strokeRect(entityx, entityy, entityw, entityh);
 
 		if (((ex > entityx && ex < entityx + entityw) &&
 		     (ey > entityy && ey < entityy + entityh)) || 
