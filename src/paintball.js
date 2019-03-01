@@ -1,3 +1,5 @@
+const util = require("util");
+
 let canvas = document.createElement("canvas");
 canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
