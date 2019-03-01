@@ -42,6 +42,10 @@ let map = [
 	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
+let entities = [
+	new util.Entity(scale * 2, scale * 2, scale / 1.25, scale / 1.25),
+]
+
 { // initialize
 	{ // map ignition
 		for (let i = 0; i < map.length; i++) {
@@ -126,6 +130,7 @@ ctx.font = "1em Arial";
 		let playerx = canvas.width / 2 - scale / 2.5;
 		let playery = canvas.height / 2 - scale / 2.5;
 		let playerr = (scale / 2.5) * 2;
+
 		{ // x movement
 			x = Math.round(x + velx);
 			
@@ -166,6 +171,20 @@ ctx.font = "1em Arial";
 		}
 	}
 
+	{ // show entities
+		entities.forEach((e) => {
+			switch (e.render.shape) {
+				case "circle": {
+					ctx.beginPath();
+					ctx.ellipse(e.position.x + e.size.w / 2 + x, e.position.y + e.size.h / 2 + y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
+				} break;
+			}
+
+			ctx.fillStyle = e.render.color;
+			ctx.fill();
+		});
+	}
+
 	// show player
 	ctx.fillStyle = "#ddd";
 	ctx.beginPath();
@@ -174,11 +193,15 @@ ctx.font = "1em Arial";
 })();
 
 function isColliding(d = "b", ex, ey, ew, eh) {
+	ctx.strokeStyle = "#f00"
+	ctx.strokeRect(ex, ey, ew, eh);
+
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			if (map[i][j] == 1) {
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
+				ctx.strokeRect(blockx, blocky, scale, scale);
 
 				if (((ex > blockx && ex < blockx + scale) &&
 				     (ey > blocky && ey < blocky + scale)) || 
@@ -189,6 +212,27 @@ function isColliding(d = "b", ex, ey, ew, eh) {
 					if (d == "b") return "b";
 				}
 			}
+		}
+	}
+
+	for (let i = 0; i < entities.length; i++) {
+		let e = entities[i];
+
+		let entityx = e.position.x + x;
+		let entityy = e.position.y + y;
+		let entityw = e.size.w;
+		let entityh = e.size.h;
+
+		ctx.strokeStyle = "#f00"
+		ctx.strokeRect(entityx, entityy, entityw, entityh);
+
+		if (((ex > entityx && ex < entityx + entityw) &&
+		     (ey > entityy && ey < entityy + entityh)) || 
+		    ((ex + ew > entityx && ex + ew < entityx + entityw) &&
+		     (ey + eh > entityy && ey + eh < entityy + entityh))) {
+			if (d == "x") return "x";
+			if (d == "y") return "y";
+			if (d == "b") return "b";
 		}
 	}
 }
