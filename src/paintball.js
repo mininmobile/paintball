@@ -3,16 +3,14 @@ canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
 document.body.appendChild(canvas);
 
-document.body.click();
-
 // render options variable
 let scale = 60;
 
 // movement variabled
 let velx = 0;
 let vely = 0;
-let playerSpeed = 3;
-let movforce = 0.2;
+let playerSpeed = 4;
+let movforce = 0.3;
 let movlt = false;
 let movrt = false;
 let movup = false;
@@ -123,10 +121,26 @@ ctx.font = "1em Arial";
 
 		lastx = x;
 		lasty = y;
-		x = Math.round(x + velx);
-		isColliding("x");
-		y = Math.round(y + vely);
-		isColliding("y");
+		let playerx = canvas.width / 2 - scale / 2.5;
+		let playery = canvas.height / 2 - scale / 2.5;
+		let playerr = (scale / 2.5) * 2;
+		{ // x movement
+			x = Math.round(x + velx);
+			
+			let d = isColliding("x", playerx, playery, playerr, playerr);
+
+			if (d == "x")
+				x -= Math.round(velx);
+		}
+
+		{ // y movement
+			y = Math.round(y + vely);
+
+			let d = isColliding("y", playerx, playery, playerr, playerr);
+
+			if (d == "y")
+				y -= Math.round(vely);
+		}
 	}
 
 	{ // show map
@@ -157,25 +171,21 @@ ctx.font = "1em Arial";
 	ctx.fill();
 })();
 
-function isColliding(d = "b") {
+function isColliding(d = "b", ex, ey, ew, eh) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			if (map[i][j] == 1) {
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
 
-				let playerx = canvas.width / 2 - scale / 2.5;
-				let playery = canvas.height / 2 - scale / 2.5;
-				let playerw = (scale / 2.5) * 2;
-				let playerh = (scale / 2.5) * 2;
-
-				if (((playerx > blockx && playerx < blockx + scale) &&
-					 (playery > blocky && playery < blocky + scale)) || 
-					((playerx + playerw > blockx && playerx + playerw < blockx + scale) &&
-					 (playery + playerh > blocky && playery + playerh < blocky + scale))) {
-						if (d == "b" || d == "x") x -= Math.round(velx);
-						if (d == "b" || d == "y") y -= Math.round(vely);
-					}
+				if (((ex > blockx && ex < blockx + scale) &&
+				     (ey > blocky && ey < blocky + scale)) || 
+				    ((ex + ew > blockx && ex + ew < blockx + scale) &&
+				     (ey + eh > blocky && ey + eh < blocky + scale))) {
+					if (d == "x") return "x";
+					if (d == "y") return "y";
+					if (d == "b") return "b";
+				}
 			}
 		}
 	}
