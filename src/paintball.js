@@ -21,9 +21,15 @@ let movdn = false;
 // position variables
 let x = 0;
 let y = 0;
-
 let lastx = x;
 let lasty = y;
+
+// mouse object
+let mouse = new util.Point(0, 0);
+document.addEventListener("mousemove", (e) => {
+	mouse.x = e.clientX;
+	mouse.y = e.clientY;
+});
 
 // map variables
 let map = [
@@ -229,4 +235,8 @@ function isColliding(d = "b", ex, ey, ew, eh) {
 			if (d == "b") return "b";
 		}
 	}
+}
+
+function angle(cx, cy, ex, ey) {
+	return Math.atan2(ey - cy, ex - cx);
 }
