@@ -16,6 +16,7 @@
 	let Entity = class {
 		constructor(x, y, w, h, options = {}) {
 			this.id = NextID();
+			this.label = options.label || "entity";
 			this.position = new Point(x, y);
 			this.size = new Point(w, h, true);
 			this.angle = options.angle || 0;

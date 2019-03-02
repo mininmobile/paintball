@@ -5,6 +5,9 @@ canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
 document.body.appendChild(canvas);
 
+// temporary data
+let shooting;
+
 // render options variable
 let scale = 60;
 
@@ -88,6 +91,21 @@ let entities = [
 			case "KeyD": movrt = false; break;
 		}
 	});
+
+	document.addEventListener("mousedown", (e) => {
+		shooting = setInterval(() => {
+			let bullet = new util.Entity(canvas.width / 2 - x, canvas.height / 2 - y, 5, 5, {
+				label: "bullet",
+				angle: angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y),
+			});
+
+			entities.push(bullet);
+		}, 50);
+	});
+
+	document.addEventListener("mouseup", (e) => {
+		clearInterval(shooting);
+	});
 }
 
 // rendering and physics
@@ -154,6 +172,27 @@ ctx.font = "1em Arial";
 			if (d == "y")
 				y -= Math.round(vely);
 		}
+	}
+
+	{ // calculate entity movement
+		let ents = entities;
+
+		for (let i = 0; i < entities.length; i++) {
+			let e = entities[i];
+
+			if (e.label == "bullet") {
+				e.position.x += 8 * Math.cos(e.angle);
+				e.position.y += 8 * Math.sin(e.angle);
+			}
+
+			if (isColliding("b", e.position.x, e.position.y, e.size.w, e.size.h)) {
+				if (e.label == "bullet") {
+					ents = ents.filter(ent => ent != e);
+				}
+			}
+		}
+		
+		entities = ents;
 	}
 
 	{ // show map
