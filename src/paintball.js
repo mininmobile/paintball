@@ -158,18 +158,18 @@ ctx.font = "1em Arial";
 		{ // x movement
 			x = Math.round(x + velx);
 			
-			let d = isColliding("x", playerx, playery, playerr, playerr);
+			let d = isColliding(playerx, playery, playerr, playerr);
 
-			if (d == "x")
+			if (d)
 				x -= Math.round(velx);
 		}
 
 		{ // y movement
 			y = Math.round(y + vely);
 
-			let d = isColliding("y", playerx, playery, playerr, playerr);
+			let d = isColliding(playerx, playery, playerr, playerr);
 
-			if (d == "y")
+			if (d)
 				y -= Math.round(vely);
 		}
 	}
@@ -185,7 +185,7 @@ ctx.font = "1em Arial";
 				e.position.y += 8 * Math.sin(e.angle);
 			}
 
-			if (isColliding("b", e.position.x, e.position.y, e.size.w, e.size.h)) {
+			if (isColliding(e.position.x, e.position.y, e.size.w, e.size.h)) {
 				if (e.label == "bullet") {
 					ents = ents.filter(ent => ent != e);
 				}
@@ -237,41 +237,21 @@ ctx.font = "1em Arial";
 	ctx.fill();
 })();
 
-function isColliding(d = "b", ex, ey, ew, eh) {
+function isColliding(ex, ey, ew, eh) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			if (map[i][j] == 1) {
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
-				ctx.strokeRect(blockx, blocky, scale, scale);
 
-				if (((ex > blockx && ex < blockx + scale) &&
-				     (ey > blocky && ey < blocky + scale)) || 
-				    ((ex + ew > blockx && ex + ew < blockx + scale) &&
-				     (ey + eh > blocky && ey + eh < blocky + scale))) {
-					if (d == "x") return "x";
-					if (d == "y") return "y";
-					if (d == "b") return "b";
+				ctx.strokeStyle = "#f00";
+				ctx.strokeRect(blockx, blocky, scale, scale)
+
+				if ((ex >= blockx && ex <= blockx + scale) &&
+				    (ey >= blocky && ey <= blocky + scale)) {
+					return true;
 				}
 			}
-		}
-	}
-
-	for (let i = 0; i < entities.length; i++) {
-		let e = entities[i];
-
-		let entityx = e.position.x + x;
-		let entityy = e.position.y + y;
-		let entityw = e.size.w;
-		let entityh = e.size.h;
-
-		if (((ex > entityx && ex < entityx + entityw) &&
-		     (ey > entityy && ey < entityy + entityh)) || 
-		    ((ex + ew > entityx && ex + ew < entityx + entityw) &&
-		     (ey + eh > entityy && ey + eh < entityy + entityh))) {
-			if (d == "x") return "x";
-			if (d == "y") return "y";
-			if (d == "b") return "b";
 		}
 	}
 }
