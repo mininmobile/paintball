@@ -151,14 +151,17 @@ ctx.font = "1em Arial";
 
 		lastx = x;
 		lasty = y;
-		let playerx = canvas.width / 2 - scale / 2.5;
-		let playery = canvas.height / 2 - scale / 2.5;
-		let playerr = (scale / 2.5) * 2;
+		let cpoints = [
+			new util.Point(canvas.width / 2 - scale / 2.5, canvas.height / 2 - scale / 2.5),
+			new util.Point(canvas.width / 2 + scale / 2.5, canvas.height / 2 - scale / 2.5),
+			new util.Point(canvas.width / 2 - scale / 2.5, canvas.height / 2 + scale / 2.5),
+			new util.Point(canvas.width / 2 + scale / 2.5, canvas.height / 2 + scale / 2.5),
+		];
 
 		{ // x movement
 			x = Math.round(x + velx);
 			
-			let d = isColliding(playerx, playery, playerr, playerr);
+			let d = isColliding(cpoints);
 
 			if (d)
 				x -= Math.round(velx);
@@ -167,7 +170,7 @@ ctx.font = "1em Arial";
 		{ // y movement
 			y = Math.round(y + vely);
 
-			let d = isColliding(playerx, playery, playerr, playerr);
+			let d = isColliding(cpoints);
 
 			if (d)
 				y -= Math.round(vely);
@@ -185,7 +188,7 @@ ctx.font = "1em Arial";
 				e.position.y += 8 * Math.sin(e.angle);
 			}
 
-			if (isColliding(e.position.x, e.position.y, e.size.w, e.size.h)) {
+			if (isColliding([new util.Point(e.position.x, e.position.y)])) {
 				if (e.label == "bullet") {
 					ents = ents.filter(ent => ent != e);
 				}
@@ -237,20 +240,23 @@ ctx.font = "1em Arial";
 	ctx.fill();
 })();
 
-function isColliding(ex, ey, ew, eh) {
+function isColliding(points) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			if (map[i][j] == 1) {
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
 
-				ctx.strokeStyle = "#f00";
-				ctx.strokeRect(blockx, blocky, scale, scale)
+				let colliding = false;
 
-				if ((ex >= blockx && ex <= blockx + scale) &&
-				    (ey >= blocky && ey <= blocky + scale)) {
-					return true;
-				}
+				points.forEach((p) => {
+					if ((p.x >= blockx && p.x <= blockx + scale) &&
+						(p.y >= blocky && p.y <= blocky + scale)) {
+						colliding = true;
+					}
+				});
+
+				if (colliding) return colliding;
 			}
 		}
 	}
