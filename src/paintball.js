@@ -94,7 +94,7 @@ let entities = [
 
 	document.addEventListener("mousedown", (e) => {
 		shooting = setInterval(() => {
-			let bullet = new util.Entity(canvas.width / 2 - x, canvas.height / 2 - y, 5, 5, {
+			let bullet = new util.Entity(canvas.width / 2, canvas.height / 2, 5, 5, {
 				label: "bullet",
 				angle: angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y),
 			});
@@ -224,7 +224,11 @@ ctx.font = "1em Arial";
 			switch (e.render.shape) {
 				case "circle": {
 					ctx.beginPath();
-					ctx.ellipse(e.position.x + e.size.w / 2 + x, e.position.y + e.size.h / 2 + y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
+
+					if (e.label != "bullet")
+						ctx.ellipse(e.position.x + e.size.w / 2 + x, e.position.y + e.size.h / 2 + y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
+					if (e.label == "bullet")
+						ctx.ellipse(e.position.x + e.size.w / 2, e.position.y + e.size.h / 2, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
 				} break;
 			}
 
@@ -259,6 +263,21 @@ function isColliding(points) {
 				if (colliding) return colliding;
 			}
 		}
+	}
+
+	for (let i = 0; i < entities.length; i++) {
+		let e = entities[i];
+
+		let colliding = false;
+
+		points.forEach((p) => {
+			if ((p.x >= e.position.x + x && p.x <= e.position.x + e.size.w + x) &&
+				(p.y >= e.position.y + y && p.y <= e.position.y + e.size.h + y)) {
+				colliding = true;
+			}
+		});
+
+		if (colliding) return colliding;
 	}
 }
 
