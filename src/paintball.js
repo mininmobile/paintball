@@ -4,6 +4,7 @@ class Enemy extends util.Entity {
 	constructor(x, y, options = {}) {
 		super(x, y, scale / 1.25, scale / 1.25, options);
 
+		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
 
 		this.on("shot", () => {
@@ -257,12 +258,20 @@ ctx.font = "1em Arial";
 					if (e.label != "bullet")
 						ctx.ellipse(e.position.x + e.size.w / 2 + x, e.position.y + e.size.h / 2 + y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
 					if (e.label == "bullet")
-						ctx.ellipse(e.position.x + e.size.w / 2, e.position.y + e.size.h / 2, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
+						ctx.ellipse(e.position.x, e.position.y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
 				} break;
 			}
 
 			ctx.fillStyle = e.render.color;
 			ctx.fill();
+
+			if (e.label != "bullet" && e.maxHealth != e.health) {
+				ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+				ctx.fillRect(e.position.x + x, e.position.y + y - em(0.8), e.size.w, em(0.5));
+
+				ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+				ctx.fillRect(e.position.x + x, e.position.y + y - em(0.8), (e.size.w / e.maxHealth) * e.health, em(0.5));
+			}
 		});
 	}
 
@@ -312,6 +321,10 @@ function isColliding(points) {
 
 function angle(cx, cy, ex, ey) {
 	return Math.atan2(ey - cy, ex - cx);
+}
+
+function em(x = 1) {
+	return x * parseFloat(getComputedStyle(document.body).fontSize);
 }
 
 // fuck lenovo and their shitty keyboards
