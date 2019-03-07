@@ -92,11 +92,22 @@ let entities = [
 		}
 	});
 
-	document.addEventListener("mousedown", (e) => {
+	document.addEventListener("mousedown", () => {
 		shooting = setInterval(() => {
 			let bullet = new util.Entity(canvas.width / 2, canvas.height / 2, 5, 5, {
 				label: "bullet",
 				angle: angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y),
+			});
+
+			bullet.on("frame", (e) => {
+				e.position.x += 8 * Math.cos(e.angle);
+				e.position.y += 8 * Math.sin(e.angle);
+
+				let target = isColliding([new util.Point(e.position.x, e.position.y)]);
+				
+				if (target) {
+					alert("poops");
+				}
 			});
 
 			entities.push(bullet);
@@ -183,16 +194,7 @@ ctx.font = "1em Arial";
 		for (let i = 0; i < entities.length; i++) {
 			let e = entities[i];
 
-			if (e.label == "bullet") {
-				e.position.x += 8 * Math.cos(e.angle);
-				e.position.y += 8 * Math.sin(e.angle);
-			}
-
-			if (isColliding([new util.Point(e.position.x, e.position.y)])) {
-				if (e.label == "bullet") {
-					ents = ents.filter(ent => ent != e);
-				}
-			}
+			e.emit("frame", e);
 		}
 		
 		entities = ents;
@@ -260,7 +262,7 @@ function isColliding(points) {
 					}
 				});
 
-				if (colliding) return colliding;
+				if (colliding) return map[i][j];
 			}
 		}
 	}
@@ -277,7 +279,7 @@ function isColliding(points) {
 			}
 		});
 
-		if (colliding) return colliding;
+		if (colliding) return e;
 	}
 }
 

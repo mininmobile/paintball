@@ -17,15 +17,45 @@
 		constructor(x, y, w, h, options = {}) {
 			this.id = NextID();
 			this.label = options.label || "entity";
+			this.angle = options.angle || 0;
 			this.position = new Point(x, y);
 			this.size = new Point(w, h, true);
-			this.angle = options.angle || 0;
 
 			this.render = options.render || {
 				"shape": "circle",
 				"color": "#f00",
 				"sprite": undefined,
 			}
+
+			this.events = [];
+		}
+
+		toString() {
+			return this.label;
+		}
+
+		/**
+		 * Add an event listener.
+		 * @param {"frame"} event
+		 * @param {(event, error: string) => {}} callback 
+		 */
+		on(event, callback) {
+			this.events.push({
+				event: event,
+				callback: callback,
+			});
+		}
+
+		/**
+		 * Call all event listeners of an event.
+		 * @param {"frame"} event
+		 */
+		emit(event, options = {}) {
+			this.events.forEach((e) => {
+				if (e.event == event) {
+					e.callback(options);
+				}
+			});
 		}
 	}
 
