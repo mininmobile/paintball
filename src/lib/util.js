@@ -51,11 +51,15 @@
 		 * @param {"frame"} event
 		 */
 		emit(event, options = {}) {
+			let result;
+
 			this.events.forEach((e) => {
 				if (e.event == event) {
-					e.callback(options);
+					result = e.callback(options);
 				}
 			});
+
+			return result;
 		}
 	}
 

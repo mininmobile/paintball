@@ -106,7 +106,15 @@ let entities = [
 				let target = isColliding([new util.Point(e.position.x, e.position.y)]);
 				
 				if (target) {
-					alert("poops");
+					let ents = [];
+
+					entities.forEach((ent) => {
+						if (ent != e) {
+							ents.push(ent);
+						}
+					});
+
+					return ents;
 				}
 			});
 
@@ -194,7 +202,9 @@ ctx.font = "1em Arial";
 		for (let i = 0; i < entities.length; i++) {
 			let e = entities[i];
 
-			e.emit("frame", e);
+			let x = e.emit("frame", e);
+
+			if (x) ents = x;
 		}
 		
 		entities = ents;
