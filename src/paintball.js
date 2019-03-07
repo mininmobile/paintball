@@ -1,5 +1,15 @@
 const util = require("util");
 
+class Enemy extends util.Entity {
+	constructor(x, y) {
+		super(x, y, scale / 1.25, scale / 1.25);
+
+		this.on("shot", () => {
+			return true;
+		});
+	}
+}
+
 let canvas = document.createElement("canvas");
 canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
@@ -52,7 +62,7 @@ let map = [
 ]
 
 let entities = [
-	new util.Entity(scale * 2, scale * 2, scale / 1.25, scale / 1.25),
+	new Enemy(scale * 2, scale * 2),
 ]
 
 { // initialize
@@ -106,13 +116,16 @@ let entities = [
 				let target = isColliding([new util.Point(e.position.x, e.position.y)]);
 				
 				if (target) {
-					let ents = [];
+					let ents = entities.filter(ent => ent != e);
 
-					entities.forEach((ent) => {
-						if (ent != e) {
-							ents.push(ent);
-						}
-					});
+					if (typeof target == "number") {
+						// bullet decal or smth
+					} else {
+						let dead = target.emit("shot");
+
+						if (dead)
+							ents = ents.filter(ent => ent != target);
+					}
 
 					return ents;
 				}
@@ -202,9 +215,9 @@ ctx.font = "1em Arial";
 		for (let i = 0; i < entities.length; i++) {
 			let e = entities[i];
 
-			let x = e.emit("frame", e);
+			let newents = e.emit("frame", e);
 
-			if (x) ents = x;
+			if (newents) ents = newents;
 		}
 		
 		entities = ents;
@@ -296,3 +309,6 @@ function isColliding(points) {
 function angle(cx, cy, ex, ey) {
 	return Math.atan2(ey - cy, ex - cx);
 }
+
+// fuck lenovo and their shitty keyboards
+// fuck 'em
