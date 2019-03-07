@@ -1,11 +1,15 @@
 const util = require("util");
 
 class Enemy extends util.Entity {
-	constructor(x, y) {
-		super(x, y, scale / 1.25, scale / 1.25);
+	constructor(x, y, options = {}) {
+		super(x, y, scale / 1.25, scale / 1.25, options);
+
+		this.health = options.health || 1;
 
 		this.on("shot", () => {
-			return true;
+			this.health--;
+
+			return this.health <= 0;
 		});
 	}
 }
@@ -62,7 +66,7 @@ let map = [
 ]
 
 let entities = [
-	new Enemy(scale * 2, scale * 2),
+	new Enemy(scale * 2, scale * 2, { health: 10 }),
 ]
 
 { // initialize
