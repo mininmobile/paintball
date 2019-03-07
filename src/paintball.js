@@ -7,7 +7,10 @@ class Enemy extends util.Entity {
 		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
 
-		this.on("shot", () => {
+		this.on("shot", (bullet) => {
+			this.velocity.x += 1.5 * Math.cos(bullet.angle);
+			this.velocity.y += 1.5 * Math.sin(bullet.angle);
+
 			this.health--;
 
 			return this.health <= 0;
@@ -126,7 +129,7 @@ let entities = [
 					if (typeof target == "number") {
 						// bullet decal or smth
 					} else {
-						let dead = target.emit("shot");
+						let dead = target.emit("shot", e);
 
 						if (dead)
 							ents = ents.filter(ent => ent != target);

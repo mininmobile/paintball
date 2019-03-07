@@ -20,6 +20,10 @@
 			this.angle = options.angle || 0;
 			this.position = new Point(x, y);
 			this.size = new Point(w, h, true);
+			
+			this.velocity = new Point(0, 0);
+			this.maxVelocity = options.maxVelocity || 4;
+			this.friction = options.friction || 0.3;
 
 			this.render = options.render || {
 				"shape": "circle",
@@ -28,6 +32,34 @@
 			}
 
 			this.events = [];
+
+			this.on("frame", () => {
+				let vel = this.velocity;
+
+				this.position.x += Math.round(vel.x);
+				this.position.y += Math.round(vel.y);
+
+				if (vel.x != 0) {
+					if (vel.x < 0)
+						vel.x += this.friction;
+					
+					if (vel.x > 0)
+						vel.x -= this.friction;
+				}
+
+				if (vel.y != 0) {
+					if (vel.y < 0)
+						vel.y += this.friction;
+
+					if (vel.y > 0)
+						vel.y -= this.friction;
+				}
+
+				if (vel.y < -this.maxVelocity) vel.y = -this.maxVelocity;
+				if (vel.y > this.maxVelocity) vel.y = this.maxVelocity;
+				if (vel.x < -this.maxVelocity) vel.x = -this.maxVelocity;
+				if (vel.x > this.maxVelocity) vel.x = this.maxVelocity;
+			});
 		}
 
 		toString() {
