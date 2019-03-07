@@ -70,7 +70,7 @@ let map = [
 ]
 
 let entities = [
-	new Enemy(scale * 2, scale * 2, { health: 10 }),
+	new Enemy(scale * 2, scale * 2, { health: 100 }),
 ]
 
 { // initialize
@@ -200,19 +200,15 @@ ctx.font = "1em Arial";
 
 		{ // x movement
 			x = Math.round(x + velx);
-			
-			let d = isColliding(cpoints);
 
-			if (d)
+			if (isColliding(cpoints))
 				x -= Math.round(velx);
 		}
 
 		{ // y movement
 			y = Math.round(y + vely);
 
-			let d = isColliding(cpoints);
-
-			if (d)
+			if (isColliding(cpoints))
 				y -= Math.round(vely);
 		}
 	}
