@@ -1,5 +1,9 @@
 const util = require("util");
 
+const fontStyles = {
+	default: "1em Arial",
+}
+
 class Enemy extends util.Entity {
 	constructor(x, y, options = {}) {
 		super(x, y, scale / 1.25, scale / 1.25, options);
@@ -135,9 +139,9 @@ let weapons = [
 		return bullet;
 	}),
 	new Weapon("Shotgun", 30, 240, () => {
-		let bulletA = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) - util.toRad(15));
+		let bulletA = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) - util.toRad(5));
 		let bulletB = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
-		let bulletC = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) + util.toRad(15));
+		let bulletC = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) + util.toRad(5));
 
 		return [bulletA, bulletB, bulletC];
 	}),
@@ -202,7 +206,12 @@ let entities = [
 			case "KeyA": movlt = true; break;
 			case "KeyD": movrt = true; break;
 
-			case "KeyR": weapons[selectedWeapon].reload(); break;
+			case "KeyR": {
+				let weapon = weapons[selectedWeapon];
+
+				if (weapon.canReload())
+					weapon.reload();
+			} break;
 
 			case "Digit1": selectWeapon(0); break;
 			case "Digit2": selectWeapon(1); break;
@@ -231,7 +240,7 @@ let entities = [
 // rendering and physics
 let ctx = canvas.getContext("2d");
 ctx.lineWidth = 2;
-ctx.font = "1em Arial";
+ctx.font = fontStyles.default;
 
 (function frame() {
 	window.requestAnimationFrame(frame);
@@ -355,16 +364,28 @@ ctx.font = "1em Arial";
 	}
 
 	{ // display weapon info
+		let skip = em(1.5);
+		let xskip = em(1.5);
+
 		weapons.forEach((w, i) => {
 			if (i == selectedWeapon) {
 				ctx.fillStyle = "#ddd";
-				ctx.fillRect(em(), em() + (em() * i * 2), 240, em() * 2);
+				ctx.fillRect(xskip, skip, 240, em(4));
+
 				ctx.fillStyle = "#161621";
+				ctx.fillText(`${w.name} ${w.reloading ? "(Reloading)" : ""}`,
+					xskip + em(0.5), skip + em(1.4));
+				ctx.fillText(`${w.currentmagammo} / ${w.currentallammo}`,
+					xskip + em(0.5), skip + em(3.4));
+
+				skip += em(4);
 			} else {
 				ctx.fillStyle = "#ddd";
-			}
+				ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo}) ${w.reloading ? "(Reloading)" : ""}`,
+					xskip + em(0.5), skip + em(1.4));
 
-			ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo}) ${w.reloading ? "(Reloading)" : ""}`, em() * 1.5, (em() * 2.4) + (em() * i * 2));
+				skip += em(2);
+			}
 		});
 	}
 
