@@ -25,9 +25,9 @@ class Weapon {
 
 	shoot() {
 		if (this.interval) {
-			shooting = setInterval(() => entities.push(this.callback()), this.interval);
+			shooting = setInterval(() => spawn(this.callback()), this.interval);
 		} else {
-			entities.push(this.callback());
+			spawn(this.callback());
 		}
 	}
 }
@@ -98,7 +98,13 @@ let weapons = [
 
 		return bullet;
 	}),
-	new Weapon("Shotgun", () => {}),
+	new Weapon("Shotgun", () => {
+		let bulletA = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) - util.toRad(15));
+		let bulletB = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
+		let bulletC = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) + util.toRad(15));
+
+		return [bulletA, bulletB, bulletC];
+	}),
 	new Weapon("Rifle", () => {
 		let bullet = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
 
@@ -351,6 +357,14 @@ function isColliding(points) {
 		});
 
 		if (colliding) return e;
+	}
+}
+
+function spawn(e) {
+	if (e[0]) {
+		e.forEach(ent => entities.push(ent));
+	} else {
+		entities.push(e);
 	}
 }
 

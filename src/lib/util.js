@@ -63,6 +63,14 @@
 		}
 	}
 
+	let toDeg = (rad) => {
+		return rad * (180 / Math.PI);
+	}
+	
+	let toRad = (deg) => {
+		return deg * (Math.PI / 180);
+	}
+
 	let NextID = () => {
 		return _id++;
 	}
@@ -72,6 +80,8 @@
 			case "util": {
 				return {
 					NextID: NextID,
+					toDeg: toDeg,
+					toRad: toRad,
 					Entity: Entity,
 					Point: Point,
 				}
