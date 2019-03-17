@@ -8,9 +8,6 @@ class Enemy extends util.Entity {
 		this.health = options.health || 1;
 
 		this.on("shot", (bullet) => {
-			this.velocity.x += 1.5 * Math.cos(bullet.angle);
-			this.velocity.y += 1.5 * Math.sin(bullet.angle);
-
 			this.health--;
 
 			return this.health <= 0;
@@ -70,7 +67,7 @@ let map = [
 ]
 
 let entities = [
-	new Enemy(scale * 2, scale * 2, { health: 100 }),
+	new Enemy(scale * 2, scale * 2, { health: 10 }),
 ]
 
 { // initialize
