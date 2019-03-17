@@ -15,6 +15,54 @@ class Enemy extends util.Entity {
 	}
 }
 
+class Weapon {
+	constructor(name, callback, interval = undefined) {
+		this.name = name;
+		this.callback = callback;
+
+		this.interval = interval;
+	}
+
+	shoot() {
+		if (this.interval) {
+			shooting = setInterval(() => entities.push(this.callback()), this.interval);
+		} else {
+			entities.push(this.callback());
+		}
+	}
+}
+
+class Bullet extends util.Entity {
+	constructor(angle) {
+		super(canvas.width / 2, canvas.height / 2, 5, 5, {
+			label: "bullet",
+			angle: angle,
+		});
+
+		this.on("frame", (e) => {
+			e.position.x += 8 * Math.cos(e.angle);
+			e.position.y += 8 * Math.sin(e.angle);
+
+			let target = isColliding([new util.Point(e.position.x, e.position.y)]);
+			
+			if (target) {
+				let ents = entities.filter(ent => ent != e);
+
+				if (typeof target == "number") {
+					// bullet decal or smth
+				} else {
+					let dead = target.emit("shot", e);
+
+					if (dead)
+						ents = ents.filter(ent => ent != target);
+				}
+
+				return ents;
+			}
+		});
+	}
+}
+
 let canvas = document.createElement("canvas");
 canvas.width = document.children[0].scrollWidth;
 canvas.height = document.children[0].scrollHeight;
@@ -22,9 +70,6 @@ document.body.appendChild(canvas);
 
 // temporary data
 let shooting;
-
-// render options variable
-let scale = 60;
 
 // movement variabled
 let velx = 0;
@@ -41,6 +86,25 @@ let x = 0;
 let y = 0;
 let lastx = x;
 let lasty = y;
+
+// render option variables
+let scale = 60;
+
+// player variables
+let selectedWeapon = 0;
+let weapons = [
+	new Weapon("Pistol", () => {
+		let bullet = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
+
+		return bullet;
+	}),
+	new Weapon("Shotgun", () => {}),
+	new Weapon("Rifle", () => {
+		let bullet = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
+
+		return bullet;
+	}, 50),
+]
 
 // mouse object
 let mouse = new util.Point(0, 0);
@@ -95,6 +159,10 @@ let entities = [
 			case "KeyS": movdn = true; break;
 			case "KeyA": movlt = true; break;
 			case "KeyD": movrt = true; break;
+
+			case "Digit1": selectWeapon(0); break;
+			case "Digit2": selectWeapon(1); break;
+			case "Digit3": selectWeapon(2); break;
 		}
 	});
 
@@ -107,37 +175,8 @@ let entities = [
 		}
 	});
 
-	document.addEventListener("mousedown", () => {
-		shooting = setInterval(() => {
-			let bullet = new util.Entity(canvas.width / 2, canvas.height / 2, 5, 5, {
-				label: "bullet",
-				angle: angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y),
-			});
-
-			bullet.on("frame", (e) => {
-				e.position.x += 8 * Math.cos(e.angle);
-				e.position.y += 8 * Math.sin(e.angle);
-
-				let target = isColliding([new util.Point(e.position.x, e.position.y)]);
-				
-				if (target) {
-					let ents = entities.filter(ent => ent != e);
-
-					if (typeof target == "number") {
-						// bullet decal or smth
-					} else {
-						let dead = target.emit("shot", e);
-
-						if (dead)
-							ents = ents.filter(ent => ent != target);
-					}
-
-					return ents;
-				}
-			});
-
-			entities.push(bullet);
-		}, 50);
+	document.addEventListener("mousedown", (e) => {
+		weapons[selectedWeapon].shoot();
 	});
 
 	document.addEventListener("mouseup", (e) => {
@@ -321,6 +360,11 @@ function angle(cx, cy, ex, ey) {
 
 function em(x = 1) {
 	return x * parseFloat(getComputedStyle(document.body).fontSize);
+}
+
+function selectWeapon(ipos) {
+	// ipos = inventory position
+	selectedWeapon = ipos;
 }
 
 // fuck lenovo and their shitty keyboards
