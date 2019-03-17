@@ -16,19 +16,55 @@ class Enemy extends util.Entity {
 }
 
 class Weapon {
-	constructor(name, callback, interval = undefined) {
+	constructor(name, magammo, allammo, callback, interval = undefined) {
 		this.name = name;
 		this.callback = callback;
 
+		this.currentmagammo = magammo;
+		this.currentallammo = allammo;
+		this.magammo = magammo;
+		this.allammo = allammo;
+
 		this.interval = interval;
+
+		this.reloading = false;
+	}
+
+	shootBullet() {
+		if (this.canShoot()) {
+			this.currentmagammo--;
+			spawn(this.callback());
+		}
+
+		if (this.canReload() && !this.canShoot()) {
+			this.reload();
+		}
 	}
 
 	shoot() {
 		if (this.interval) {
-			shooting = setInterval(() => spawn(this.callback()), this.interval);
+			shooting = setInterval(() => this.shootBullet(), this.interval);
 		} else {
-			spawn(this.callback());
+			this.shootBullet();
 		}
+	}
+
+	reload() {
+		this.reloading = true;
+
+		setTimeout(() => {
+			this.currentmagammo = this.magammo;
+			this.currentallammo -= this.magammo;
+			this.reloading = false;
+		}, 1000);
+	}
+
+	canShoot() {
+		return this.currentmagammo > 0;
+	}
+
+	canReload() {
+		return this.currentallammo > 0 && !this.reloading;
 	}
 }
 
@@ -93,19 +129,19 @@ let scale = 60;
 // player variables
 let selectedWeapon = 0;
 let weapons = [
-	new Weapon("Pistol", () => {
+	new Weapon("Pistol", 30, 240, () => {
 		let bullet = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
 
 		return bullet;
 	}),
-	new Weapon("Shotgun", () => {
+	new Weapon("Shotgun", 30, 240, () => {
 		let bulletA = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) - util.toRad(15));
 		let bulletB = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
 		let bulletC = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y) + util.toRad(15));
 
 		return [bulletA, bulletB, bulletC];
 	}),
-	new Weapon("Rifle", () => {
+	new Weapon("Rifle", 30, 240, () => {
 		let bullet = new Bullet(angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y));
 
 		return bullet;
@@ -322,10 +358,10 @@ ctx.font = "1em Arial";
 				ctx.fillStyle = "#ddd";
 				ctx.fillRect(em(), em() + (em() * i * 2), 240, em() * 2);
 				ctx.fillStyle = "#161621";
-				ctx.fillText(w.name, em() * 1.5, (em() * 2.4) + (em() * i * 2));
+				ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo})`, em() * 1.5, (em() * 2.4) + (em() * i * 2));
 			} else {
 				ctx.fillStyle = "#ddd";
-				ctx.fillText(w.name, em() * 1.5, (em() * 2.4) + (em() * i * 2));
+				ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo})`, em() * 1.5, (em() * 2.4) + (em() * i * 2));
 			}
 		});
 	}
