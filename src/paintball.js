@@ -316,6 +316,20 @@ ctx.font = "1em Arial";
 		});
 	}
 
+	{ // display weapon info
+		weapons.forEach((w, i) => {
+			if (i == selectedWeapon) {
+				ctx.fillStyle = "#ddd";
+				ctx.fillRect(em(), em() + (em() * i * 2), 240, em() * 2);
+				ctx.fillStyle = "#161621";
+				ctx.fillText(w.name, em() * 1.5, (em() * 2.4) + (em() * i * 2));
+			} else {
+				ctx.fillStyle = "#ddd";
+				ctx.fillText(w.name, em() * 1.5, (em() * 2.4) + (em() * i * 2));
+			}
+		});
+	}
+
 	// show player
 	ctx.fillStyle = "#ddd";
 	ctx.beginPath();
