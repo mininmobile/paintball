@@ -21,10 +21,20 @@
 			this.position = new Point(x, y);
 			this.size = new Point(w, h, true);
 
-			this.render = options.render || {
-				"shape": "circle",
-				"color": "#f00",
-				"sprite": undefined,
+			if (options.render) {
+				let ro = options.render;
+
+				this.render = {
+					"shape": ro.shape || "circle",
+					"color": ro.color || "#f00",
+					"sprite": ro.sprite || undefined,
+				}
+			} else {
+				this.render = {
+					"shape": "circle",
+					"color": "#f00",
+					"sprite": undefined,
+				}
 			}
 
 			this.events = [];

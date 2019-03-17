@@ -77,6 +77,9 @@ class Bullet extends util.Entity {
 		super(canvas.width / 2, canvas.height / 2, 5, 5, {
 			label: "bullet",
 			angle: angle,
+			render: {
+				color: "#fff",
+			},
 		});
 
 		this.on("frame", (e) => {
@@ -160,25 +163,43 @@ document.addEventListener("mousemove", (e) => {
 });
 
 // map variables
-let map = [
-	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
-	[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-	[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+let levels = [
+	{
+		name: "Intro",
+		map: [
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 2, 0, 0, 0, 3, 0, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+		],
+		entities: [],
+	},
+	{
+		name: "Test Map",
+		map: [
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+			[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		],
+		entities: [
+			new Enemy(scale * 2, scale * 2, { health: 10 }),
+		],
+	}
 ]
 
-let entities = [
-	new Enemy(scale * 2, scale * 2, { health: 10 }),
-]
+let map = levels[0].map;
+let entities = levels[0].entities;
 
 { // initialize
 	{ // map ignition
@@ -237,12 +258,30 @@ let entities = [
 	});
 }
 
+// load resources
+let asseturls = ["./src/img/wool.png"]
+let assets = {}
+
+{ // get assets
+	asseturls.forEach((a) => {
+		let loader = assets[a.split("/").pop()] = new Image();
+
+		loader.src = a;
+
+		loader.addEventListener("load", () => {
+			if (Object.keys(assets).length == asseturls.length)
+				frame();
+		});
+	});
+}
+
 // rendering and physics
 let ctx = canvas.getContext("2d");
-ctx.lineWidth = 2;
+ctx.imageSmoothingEnabled = false;
 ctx.font = fontStyles.default;
+ctx.lineWidth = 2;
 
-(function frame() {
+function frame() {
 	window.requestAnimationFrame(frame);
 
 	ctx.fillStyle = "#161621";
@@ -332,6 +371,10 @@ ctx.font = fontStyles.default;
 						ctx.fillStyle = "#0a0";
 						ctx.fillRect(blockx, blocky, scale, scale);
 					} break;
+
+					case 3: {
+						ctx.drawImage(assets["wool.png"], blockx, blocky, scale, scale);
+					} break;
 				}
 			}
 		}
@@ -394,12 +437,12 @@ ctx.font = fontStyles.default;
 	ctx.beginPath();
 	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
 	ctx.fill();
-})();
+};
 
 function isColliding(points) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
-			if (map[i][j] == 1) {
+			if ([1, 3].includes(map[i][j])) {
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
 
@@ -412,7 +455,8 @@ function isColliding(points) {
 					}
 				});
 
-				if (colliding) return map[i][j];
+				if (colliding)
+					return { x: j, y: i, type: map[i][j] }
 			}
 		}
 	}
