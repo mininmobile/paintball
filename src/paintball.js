@@ -202,6 +202,8 @@ let entities = [
 			case "KeyA": movlt = true; break;
 			case "KeyD": movrt = true; break;
 
+			case "KeyR": weapons[selectedWeapon].reload(); break;
+
 			case "Digit1": selectWeapon(0); break;
 			case "Digit2": selectWeapon(1); break;
 			case "Digit3": selectWeapon(2); break;
@@ -358,11 +360,11 @@ ctx.font = "1em Arial";
 				ctx.fillStyle = "#ddd";
 				ctx.fillRect(em(), em() + (em() * i * 2), 240, em() * 2);
 				ctx.fillStyle = "#161621";
-				ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo})`, em() * 1.5, (em() * 2.4) + (em() * i * 2));
 			} else {
 				ctx.fillStyle = "#ddd";
-				ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo})`, em() * 1.5, (em() * 2.4) + (em() * i * 2));
 			}
+
+			ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo}) ${w.reloading ? "(Reloading)" : ""}`, em() * 1.5, (em() * 2.4) + (em() * i * 2));
 		});
 	}
 
