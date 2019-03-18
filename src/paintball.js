@@ -211,7 +211,6 @@ let levels = [
 			[1, 0, 0, 0, 1],
 			[1, 1, 1, 1, 1],
 		],
-		entities: [],
 	},
 	{
 		name: "Test Map",
@@ -238,6 +237,7 @@ let levels = [
 
 let currentMap = 0;
 
+let behavior = [];
 let map = [];
 let entities = [];
 
@@ -390,6 +390,56 @@ function frame() {
 		}
 		
 		entities = ents;
+	}
+
+	{ // evaluate map behavior
+		let parseLine = (line) => {
+			let tokens = line.split(" ");
+
+			switch (tokens[0]) {
+				case "if": {
+					let parts = line.split(" > ");
+
+					let condition = parts[0].split(" ");
+					condition.shift();
+
+					let result = false;
+
+					switch (condition[2]) {
+						case "==": {
+							result =
+								map[parseInt(condition[1])][parseInt(condition[0])] == parseInt(condition[3]);
+						} break;
+					}
+
+					if (result) {
+						parseLine(parts[1]);
+					} else {
+						parseLine(parts[2]);
+					}
+				} break;
+
+				case "set": {
+					map[parseInt(tokens[2])][parseInt(tokens[1])] = parseInt(tokens[3]);
+				} break;
+
+				case "jump": {
+					i = parseInt(tokens[1]) - 1;
+				} break;
+
+				case "continue": break;
+
+				default: {
+					console.error(`Invalid Behavior Token: "${tokens[0]}" on line "${line}".`);
+				}
+			}
+		}
+
+		let i = 0;
+
+		for (; i < behavior.length; i++) {
+			parseLine(behavior[i]);
+		}
 	}
 
 	{ // show map
@@ -572,8 +622,11 @@ function isColliding(points) {
 function selectMap(id) {
 	currentMap = id;
 
-	map = levels[id].map;
-	entities = levels[id].entities;
+	let lvl = levels[id];
+
+	behavior = lvl.behavior || [];
+	map = lvl.map || [];
+	entities = lvl.entities || [];
 	
 	{ // initialize
 		{ // map ignition
