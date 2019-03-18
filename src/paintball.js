@@ -98,7 +98,17 @@ class Bullet extends util.Entity {
 				let ents = entities.filter(ent => ent != e);
 
 				if (target.type) {
-					// bullet decal or smth
+					switch (target.type) {
+						case 3: case 4: case 5: {
+							let newBlockID;
+
+							if (selectedColor[0] == "white") newBlockID = 3;
+							if (selectedColor[0] == "red") newBlockID = 4;
+							if (selectedColor[0] == "yellow") newBlockID = 5;
+
+							map[target.y][target.x] = newBlockID;
+						} break;
+					}
 				} else {
 					let dead = target.emit("shot", e);
 
@@ -261,7 +271,8 @@ selectMap(0);
 }
 
 // load resources
-let asseturls = ["./src/img/wool.png"]
+let asseturls = ["./src/img/white-wool.png", "./src/img/red-wool.png", "./src/img/yellow-wool.png"]
+let assetsImported = 0;
 let assets = {}
 
 { // get assets
@@ -271,7 +282,9 @@ let assets = {}
 		loader.src = a;
 
 		loader.addEventListener("load", () => {
-			if (Object.keys(assets).length == asseturls.length)
+			assetsImported++;
+
+			if (assetsImported == asseturls.length)
 				frame();
 		});
 	});
@@ -375,7 +388,15 @@ function frame() {
 					} break;
 
 					case 3: {
-						ctx.drawImage(assets["wool.png"], blockx, blocky, scale, scale);
+						ctx.drawImage(assets["white-wool.png"], blockx, blocky, scale, scale);
+					} break;
+
+					case 4: {
+						ctx.drawImage(assets["red-wool.png"], blockx, blocky, scale, scale);
+					} break;
+
+					case 5: {
+						ctx.drawImage(assets["yellow-wool.png"], blockx, blocky, scale, scale);
 					} break;
 				}
 			}
@@ -476,7 +497,7 @@ function frame() {
 function isColliding(points) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
-			if ([1, 3].includes(map[i][j])) {
+			if ([1, 3, 4, 5].includes(map[i][j])) {
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
 
