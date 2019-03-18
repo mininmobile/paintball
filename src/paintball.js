@@ -194,11 +194,11 @@ let levels = [
 	{
 		name: "Intro",
 		behavior: [
-			"if 6 2 == 11 > continue > jump 3", // if wool is red
-				"set 2 4 0", // open door
-			"jump 4", // else
-				"set 2 4 1", // close door
-			"continue", // do nothing
+			"if 6 2 == 11 > set 2 4 0 > set 2 4 1",
+			// if wool is red
+				// open door
+			// else
+				// close door
 		],
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
