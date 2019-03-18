@@ -208,26 +208,10 @@ let levels = [
 	}
 ]
 
-let map = levels[0].map;
-let entities = levels[0].entities;
+let map = [];
+let entities = [];
 
-{ // initialize
-	{ // map ignition
-		for (let i = 0; i < map.length; i++) {
-			for (let j = 0; j < map[i].length; j++) {
-				let blockx = j * scale;
-				let blocky = i * scale;
-
-				switch (map[i][j]) {
-					case 2: {
-						x = canvas.width / 2 - blockx - scale / 2;
-						y = canvas.height / 2 - blocky - scale / 2;
-					} break;
-				}
-			}
-		}
-	}
-}
+selectMap(0);
 
 { // controls
 	document.addEventListener("keydown", (e) => {
@@ -524,6 +508,29 @@ function isColliding(points) {
 		});
 
 		if (colliding) return e;
+	}
+}
+
+function selectMap(id) {
+	map = levels[id].map;
+	entities = levels[id].entities;
+	
+	{ // initialize
+		{ // map ignition
+			for (let i = 0; i < map.length; i++) {
+				for (let j = 0; j < map[i].length; j++) {
+					let blockx = j * scale;
+					let blocky = i * scale;
+	
+					switch (map[i][j]) {
+						case 2: {
+							x = canvas.width / 2 - blockx - scale / 2;
+							y = canvas.height / 2 - blocky - scale / 2;
+						} break;
+					}
+				}
+			}
+		}
 	}
 }
 
