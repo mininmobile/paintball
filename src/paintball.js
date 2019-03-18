@@ -4,6 +4,12 @@ const fontStyles = {
 	default: "1em Arial",
 }
 
+const colors = {
+	white: "#ccc",
+	red: "#a00",
+	yellow: "#dd0",
+}
+
 class Enemy extends util.Entity {
 	constructor(x, y, options = {}) {
 		super(x, y, scale / 1.25, scale / 1.25, options);
@@ -78,7 +84,7 @@ class Bullet extends util.Entity {
 			label: "bullet",
 			angle: angle,
 			render: {
-				color: "#fff",
+				color: colors[selectedColor[0]],
 			},
 		});
 
@@ -91,7 +97,7 @@ class Bullet extends util.Entity {
 			if (target) {
 				let ents = entities.filter(ent => ent != e);
 
-				if (typeof target == "number") {
+				if (target.type) {
 					// bullet decal or smth
 				} else {
 					let dead = target.emit("shot", e);
@@ -113,6 +119,9 @@ document.body.appendChild(canvas);
 
 // temporary data
 let shooting;
+let colorAnimating = false;
+let colorFrame = 0;
+let colorVel = 0;
 
 // movement variabled
 let velx = 0;
@@ -134,6 +143,7 @@ let lasty = y;
 let scale = 60;
 
 // player variables
+let selectedColor = ["white", "red", "yellow"]
 let selectedWeapon = 0;
 let weapons = [
 	new Weapon("Pistol", 30, 240, () => {
@@ -250,11 +260,19 @@ let entities = levels[0].entities;
 	});
 
 	document.addEventListener("mousedown", (e) => {
-		weapons[selectedWeapon].shoot();
+		if (e.button == 0) {
+			weapons[selectedWeapon].shoot();
+		} else if (e.button == 2) {
+			colorAnimating = true;
+		}
 	});
 
 	document.addEventListener("mouseup", (e) => {
-		clearInterval(shooting);
+		if (e.button == 0) {
+			clearInterval(shooting);
+		} else if (e.button == 2) {
+			// smth
+		}
 	});
 }
 
@@ -407,29 +425,61 @@ function frame() {
 	}
 
 	{ // display weapon info
-		let skip = em(1.5);
-		let xskip = em(1.5);
+		{ // weapon display
+			let skip = em(1.5);
+			let xskip = em(1.5);
+	
+			weapons.forEach((w, i) => {
+				if (i == selectedWeapon) {
+					ctx.fillStyle = "#ddd";
+					ctx.fillRect(xskip, skip, 240, em(4));
+	
+					ctx.fillStyle = "#161621";
+					ctx.fillText(`${w.name} ${w.reloading ? "(Reloading)" : ""}`,
+						xskip + em(0.5), skip + em(1.4));
+					ctx.fillText(`${w.currentmagammo} / ${w.currentallammo}`,
+						xskip + em(0.5), skip + em(3.4));
+	
+					skip += em(4);
+				} else {
+					ctx.fillStyle = "#ddd";
+					ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo}) ${w.reloading ? "(Reloading)" : ""}`,
+						xskip + em(0.5), skip + em(1.4));
+	
+					skip += em(2);
+				}
+			});
+		}
 
-		weapons.forEach((w, i) => {
-			if (i == selectedWeapon) {
-				ctx.fillStyle = "#ddd";
-				ctx.fillRect(xskip, skip, 240, em(4));
+		{ // selected color
+			if (colorAnimating) {
+				colorVel += colorFrame > 1.05 ? -0.01 : 0.01;
+				colorFrame += colorVel;
 
-				ctx.fillStyle = "#161621";
-				ctx.fillText(`${w.name} ${w.reloading ? "(Reloading)" : ""}`,
-					xskip + em(0.5), skip + em(1.4));
-				ctx.fillText(`${w.currentmagammo} / ${w.currentallammo}`,
-					xskip + em(0.5), skip + em(3.4));
-
-				skip += em(4);
-			} else {
-				ctx.fillStyle = "#ddd";
-				ctx.fillText(`${w.name} (${w.currentmagammo} / ${w.currentallammo}) ${w.reloading ? "(Reloading)" : ""}`,
-					xskip + em(0.5), skip + em(1.4));
-
-				skip += em(2);
+				if (colorFrame >= 2) {
+					colorFrame = 0;
+					colorAnimating = false;
+					selectedColor.push(selectedColor.shift());
+				}
 			}
-		});
+
+			ctx.strokeStyle = "#000";
+
+			ctx.fillStyle = colors[selectedColor[2]];
+			ctx.beginPath();
+			ctx.ellipse(canvas.width - em(2 + colorFrame), em(4 - colorFrame), em(), em(), 0, 0, Math.PI * 2);
+			ctx.fill(); ctx.stroke();
+
+			ctx.fillStyle = colors[selectedColor[1]];
+			ctx.beginPath();
+			ctx.ellipse(canvas.width - em(4), em(2 + colorFrame), em(1 + colorFrame / 2), em(1 + colorFrame / 2), 0, 0, Math.PI * 2);
+			ctx.fill(); ctx.stroke();
+
+			ctx.fillStyle = colors[selectedColor[0]];
+			ctx.beginPath();
+			ctx.ellipse(canvas.width - em(4 - colorFrame), em(4), em(2 - colorFrame / 2), em(2 - colorFrame / 2), 0, 0, Math.PI * 2);
+			ctx.fill(); ctx.stroke();
+		}
 	}
 
 	// show player
