@@ -257,6 +257,7 @@ selectMap(0);
 		if (e.button == 0) {
 			weapons[selectedWeapon].shoot();
 		} else if (e.button == 2) {
+			colorVel = 0.15;
 			colorAnimating = true;
 		}
 	});
@@ -458,7 +459,7 @@ function frame() {
 
 		{ // selected color
 			if (colorAnimating) {
-				colorVel += colorFrame > 1.05 ? -0.01 : 0.01;
+				colorVel -= 0.005;
 				colorFrame += colorVel;
 
 				if (colorFrame >= 2) {
