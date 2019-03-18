@@ -99,12 +99,12 @@ class Bullet extends util.Entity {
 
 				if (target.type) {
 					switch (target.type) {
-						case 3: case 4: case 5: {
+						case 10: case 11: case 12: {
 							let newBlockID;
 
-							if (selectedColor[0] == "white") newBlockID = 3;
-							if (selectedColor[0] == "red") newBlockID = 4;
-							if (selectedColor[0] == "yellow") newBlockID = 5;
+							if (selectedColor[0] == "white") newBlockID = 10;
+							if (selectedColor[0] == "red") newBlockID = 11;
+							if (selectedColor[0] == "yellow") newBlockID = 12;
 
 							map[target.y][target.x] = newBlockID;
 						} break;
@@ -183,15 +183,33 @@ document.addEventListener("mousemove", (e) => {
 });
 
 // map variables
+// 0  air
+// 1  wall
+// 2  spawnpoint
+// 3  finish
+// 10 white wool
+// 11 red wool
+// 12 yellow wool
 let levels = [
 	{
 		name: "Intro",
+		behavior: [
+			"if 6 2 == 11 > continue > jump 3", // if wool is red
+				"set 2 4 0", // open door
+			"jump 4", // else
+				"set 2 4 1", // close door
+			"continue", // do nothing
+		],
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 2, 0, 0, 0, 3, 0, 1],
+			[1, 0, 2, 0, 0, 0, 10, 0, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 1],
+			[1, 0, 3, 0, 1],
+			[1, 0, 0, 0, 1],
+			[1, 1, 1, 1, 1],
 		],
 		entities: [],
 	},
@@ -217,6 +235,8 @@ let levels = [
 		],
 	}
 ]
+
+let currentMap = 0;
 
 let map = [];
 let entities = [];
@@ -272,15 +292,16 @@ selectMap(0);
 }
 
 // load resources
-let asseturls = ["./src/img/white-wool.png", "./src/img/red-wool.png", "./src/img/yellow-wool.png"]
+let asseturls = ["img/finish.png", "img/white-wool.png", "img/red-wool.png", "img/yellow-wool.png"]
 let assetsImported = 0;
 let assets = {}
 
 { // get assets
 	asseturls.forEach((a) => {
-		let loader = assets[a.split("/").pop()] = new Image();
+		let path = "./src/" + a;
+		let loader = assets[path.split("/").pop()] = new Image();
 
-		loader.src = a;
+		loader.src = path;
 
 		loader.addEventListener("load", () => {
 			assetsImported++;
@@ -374,10 +395,12 @@ function frame() {
 	{ // show map
 		for (let i = 0; i < map.length; i++) {
 			for (let j = 0; j < map[i].length; j++) {
+				let blocktype = map[i][j];
+
 				let blockx = j * scale + x;
 				let blocky = i * scale + y;
 
-				switch (map[i][j]) {
+				switch (blocktype) {
 					case 1: {
 						ctx.fillStyle = "#aaa";
 						ctx.fillRect(blockx, blocky, scale, scale);
@@ -389,14 +412,18 @@ function frame() {
 					} break;
 
 					case 3: {
+						ctx.drawImage(assets["finish.png"], blockx, blocky, scale, scale);
+					} break;
+
+					case 10: {
 						ctx.drawImage(assets["white-wool.png"], blockx, blocky, scale, scale);
 					} break;
 
-					case 4: {
+					case 11: {
 						ctx.drawImage(assets["red-wool.png"], blockx, blocky, scale, scale);
 					} break;
 
-					case 5: {
+					case 12: {
 						ctx.drawImage(assets["yellow-wool.png"], blockx, blocky, scale, scale);
 					} break;
 				}
@@ -498,21 +525,30 @@ function frame() {
 function isColliding(points) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
-			if ([1, 3, 4, 5].includes(map[i][j])) {
-				let blockx = j * scale + x;
-				let blocky = i * scale + y;
+			let blocktype = map[i][j];
 
-				let colliding = false;
+			let blockx = j * scale + x;
+			let blocky = i * scale + y;
 
-				points.forEach((p) => {
-					if ((p.x >= blockx && p.x <= blockx + scale) &&
-						(p.y >= blocky && p.y <= blocky + scale)) {
-						colliding = true;
-					}
-				});
+			let colliding = false;
 
-				if (colliding)
-					return { x: j, y: i, type: map[i][j] }
+			points.forEach((p) => {
+				if ((p.x >= blockx && p.x <= blockx + scale) &&
+					(p.y >= blocky && p.y <= blocky + scale)) {
+					colliding = true;
+				}
+			});
+
+			if (colliding) {
+				switch(blocktype) {
+					case 1: case 10: case 11: case 12: {
+						return { x: j, y: i, type: blocktype }
+					} break;
+
+					case 3: {
+						selectMap(currentMap + 1);
+					} break;
+				}
 			}
 		}
 	}
@@ -534,6 +570,8 @@ function isColliding(points) {
 }
 
 function selectMap(id) {
+	currentMap = id;
+
 	map = levels[id].map;
 	entities = levels[id].entities;
 	
@@ -548,6 +586,10 @@ function selectMap(id) {
 						case 2: {
 							x = canvas.width / 2 - blockx - scale / 2;
 							y = canvas.height / 2 - blocky - scale / 2;
+						} break;
+
+						case 3: {
+
 						} break;
 					}
 				}
