@@ -28,12 +28,14 @@
 					"shape": ro.shape || "circle",
 					"color": ro.color || "#f00",
 					"sprite": ro.sprite || undefined,
+					"action": ro.action || (() => {}),
 				}
 			} else {
 				this.render = {
 					"shape": "circle",
 					"color": "#f00",
 					"sprite": undefined,
+					"action": () => {},
 				}
 			}
 

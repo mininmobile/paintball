@@ -25,6 +25,37 @@ class Enemy extends util.Entity {
 	}
 }
 
+class Door extends util.Entity {
+	constructor(blockx, blocky, color, id, open = 0) {
+		super(blockx * scale, blocky * scale, scale, scale, {
+			label: "door",
+			render: {
+				shape: "custom",
+				color: "#aaa",
+				action: () => {
+					drawDoor(blockx * scale + x, blocky * scale + y, this.open);
+				},
+			},
+		});
+
+		this.on("collide", () => {
+			if (this.open == 0) {
+				return false;
+			} else {
+				return true;
+			}
+		});
+
+		this.id = id;
+
+		this.color = color;
+
+		this.open = open;
+		this.opening = false;
+		this.closing = false;
+	}
+}
+
 class Weapon {
 	constructor(name, magammo, allammo, callback, interval = undefined) {
 		this.name = name;
@@ -196,17 +227,22 @@ document.addEventListener("mousemove", (e) => {
 let levels = [
 	{
 		name: "Intro",
-		behavior: ["if 6 2 == 11 > set 2 4 0 > set 2 4 3"],
+		behavior: [
+			"if 6 2 == 11 > open door > close door",
+		],
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
 			[1, 0, 5, 0, 0, 0, 10, 0, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 1, 3, 1, 1, 1, 1, 1, 1],
+			[1, 1, 0, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 1],
 			[1, 0, 6, 0, 1],
 			[1, 0, 0, 0, 1],
 			[1, 1, 1, 1, 1],
+		],
+		entities: [
+			new Door(2, 4, 3, "door"),
 		],
 	},
 	{
@@ -363,14 +399,14 @@ function frame() {
 		{ // x movement
 			x = Math.round(x + velx);
 
-			if (isColliding(cpoints))
+			if (isColliding(cpoints, true))
 				x -= Math.round(velx);
 		}
 
 		{ // y movement
 			y = Math.round(y + vely);
 
-			if (isColliding(cpoints))
+			if (isColliding(cpoints, true))
 				y -= Math.round(vely);
 		}
 	}
@@ -420,6 +456,22 @@ function frame() {
 					map[parseInt(tokens[2])][parseInt(tokens[1])] = parseInt(tokens[3]);
 				} break;
 
+				case "close": {
+					entities.forEach((e) => {
+						if (e.id == tokens[1]) {
+							e.open = 0;
+						}
+					});
+				} break;
+
+				case "open": {
+					entities.forEach((e) => {
+						if (e.id == tokens[1]) {
+							e.open = 1;
+						}
+					});
+				} break;
+
 				case "jump": {
 					i = parseInt(tokens[1]) - 1;
 				} break;
@@ -451,19 +503,6 @@ function frame() {
 					case 1: {
 						ctx.fillStyle = "#aaa";
 						ctx.fillRect(blockx, blocky, scale, scale);
-					} break;
-
-					case 2: case 3: case 4: {
-						ctx.fillStyle = "#aaa";
-						ctx.fillRect(blockx, blocky, scale, scale);
-
-						if (blocktype == 2) ctx.fillStyle = colors.white;
-						if (blocktype == 3) ctx.fillStyle = colors.red;
-						if (blocktype == 4) ctx.fillStyle = colors.yellow;
-
-						ctx.beginPath();
-						ctx.ellipse(blockx + scale / 2, blocky + scale / 2, scale / 4, scale / 4, 0, 0, Math.PI * 2);
-						ctx.fill();
 					} break;
 
 					case 5: {
@@ -501,6 +540,10 @@ function frame() {
 						ctx.ellipse(e.position.x + e.size.w / 2 + x, e.position.y + e.size.h / 2 + y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
 					if (e.label == "bullet")
 						ctx.ellipse(e.position.x, e.position.y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
+				} break;
+
+				case "custom": {
+					e.render.action();
 				} break;
 			}
 
@@ -582,7 +625,7 @@ function frame() {
 	ctx.fill();
 }
 
-function isColliding(points) {
+function isColliding(points, player = false) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			let blocktype = map[i][j];
@@ -601,13 +644,13 @@ function isColliding(points) {
 
 			if (colliding) {
 				switch(blocktype) {
-					case 1: case 2: case 3: case 4:
-					case 10: case 11: case 12: {
+					case 1: case 10: case 11: case 12: {
 						return { x: j, y: i, type: blocktype }
 					} break;
 
 					case 6: {
-						selectMap(currentMap + 1);
+						if (player)
+							selectMap(currentMap + 1);
 					} break;
 				}
 			}
@@ -622,11 +665,12 @@ function isColliding(points) {
 		points.forEach((p) => {
 			if ((p.x >= e.position.x + x && p.x <= e.position.x + e.size.w + x) &&
 				(p.y >= e.position.y + y && p.y <= e.position.y + e.size.h + y)) {
-				colliding = true;
+				colliding = !e.emit("collide");
 			}
 		});
 
-		if (colliding) return e;
+		if (colliding)
+			return e;
 	}
 }
 
@@ -668,6 +712,37 @@ function spawn(e) {
 	} else {
 		entities.push(e);
 	}
+}
+
+function drawDoor(startx, y, open) {
+	let x;
+
+	let bit = scale / 10;
+
+	x = Math.round(startx - open * (scale / 2));
+
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+	ctx.lineTo(x + bit * 4, y);
+	ctx.lineTo(x + bit * 5, y + bit);
+	ctx.lineTo(x + bit * 5, y + scale - bit);
+	ctx.lineTo(x + bit * 4, y + scale);
+	ctx.lineTo(x, y + scale);
+	ctx.lineTo(x, y);
+	ctx.fill();
+
+	x = startx + open * (scale / 2);
+
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+	ctx.lineTo(x + bit * 6, y);
+	ctx.lineTo(x + scale, y);
+	ctx.lineTo(x + scale, y + scale);
+	ctx.lineTo(x + bit * 6, y + scale);
+	ctx.lineTo(x + bit * 5, y + scale - bit);
+	ctx.lineTo(x + bit * 5, y + bit);
+	ctx.lineTo(x + bit * 6, y);
+	ctx.fill();
 }
 
 function angle(cx, cy, ex, ey) {
