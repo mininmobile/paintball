@@ -185,29 +185,26 @@ document.addEventListener("mousemove", (e) => {
 // map variables
 // 0  air
 // 1  wall
-// 2  spawnpoint
-// 3  finish
+// 2  white wall
+// 3  red wall
+// 4  yellow wall
+// 5  spawnpoint
+// 6  finish
 // 10 white wool
 // 11 red wool
 // 12 yellow wool
 let levels = [
 	{
 		name: "Intro",
-		behavior: [
-			"if 6 2 == 11 > set 2 4 0 > set 2 4 1",
-			// if wool is red
-				// open door
-			// else
-				// close door
-		],
+		behavior: ["if 6 2 == 11 > set 2 4 0 > set 2 4 3"],
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 2, 0, 0, 0, 10, 0, 1],
+			[1, 0, 5, 0, 0, 0, 10, 0, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 1, 3, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 1],
-			[1, 0, 3, 0, 1],
+			[1, 0, 6, 0, 1],
 			[1, 0, 0, 0, 1],
 			[1, 1, 1, 1, 1],
 		],
@@ -218,7 +215,7 @@ let levels = [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
 			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1],
+			[1, 0, 0, 1, 0, 0, 5, 0, 0, 1, 0, 0, 1],
 			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
 			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
 			[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
@@ -456,12 +453,25 @@ function frame() {
 						ctx.fillRect(blockx, blocky, scale, scale);
 					} break;
 
-					case 2: {
+					case 2: case 3: case 4: {
+						ctx.fillStyle = "#aaa";
+						ctx.fillRect(blockx, blocky, scale, scale);
+
+						if (blocktype == 2) ctx.fillStyle = colors.white;
+						if (blocktype == 3) ctx.fillStyle = colors.red;
+						if (blocktype == 4) ctx.fillStyle = colors.yellow;
+
+						ctx.beginPath();
+						ctx.ellipse(blockx + scale / 2, blocky + scale / 2, scale / 4, scale / 4, 0, 0, Math.PI * 2);
+						ctx.fill();
+					} break;
+
+					case 5: {
 						ctx.fillStyle = "#0a0";
 						ctx.fillRect(blockx, blocky, scale, scale);
 					} break;
 
-					case 3: {
+					case 6: {
 						ctx.drawImage(assets["finish.png"], blockx, blocky, scale, scale);
 					} break;
 
@@ -570,7 +580,7 @@ function frame() {
 	ctx.beginPath();
 	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
 	ctx.fill();
-};
+}
 
 function isColliding(points) {
 	for (let i = 0; i < map.length; i++) {
@@ -591,11 +601,12 @@ function isColliding(points) {
 
 			if (colliding) {
 				switch(blocktype) {
-					case 1: case 10: case 11: case 12: {
+					case 1: case 2: case 3: case 4:
+					case 10: case 11: case 12: {
 						return { x: j, y: i, type: blocktype }
 					} break;
 
-					case 3: {
+					case 6: {
 						selectMap(currentMap + 1);
 					} break;
 				}
@@ -636,7 +647,7 @@ function selectMap(id) {
 					let blocky = i * scale;
 	
 					switch (map[i][j]) {
-						case 2: {
+						case 5: {
 							x = canvas.width / 2 - blockx - scale / 2;
 							y = canvas.height / 2 - blocky - scale / 2;
 						} break;
