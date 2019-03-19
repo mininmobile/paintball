@@ -31,10 +31,8 @@ class Door extends util.Entity {
 			label: "door",
 			render: {
 				shape: "custom",
-				color: "#aaa",
-				action: () => {
-					drawDoor(blockx * scale + x, blocky * scale + y, this.open, this.color);
-				},
+				action: () =>
+					drawDoor(blockx * scale + x, blocky * scale + y, this.open, this.color),
 			},
 		});
 
