@@ -245,6 +245,16 @@ document.addEventListener("mousemove", (e) => {
 let levels = [
 	{
 		name: "Intro",
+		map: [
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 5, 0, 0, 0, 6, 0, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+		]
+	},
+	{
+		name: "Intro",
 		behavior: [
 			"if 6 2 == 11 > open door > close door",
 		],
