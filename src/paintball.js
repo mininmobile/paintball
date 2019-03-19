@@ -46,6 +46,26 @@ class Door extends util.Entity {
 			}
 		});
 
+		this.on("frame", () => {
+			if (this.opening) {
+				if (this.open < 1) {
+					this.open += 0.05;
+				} else {
+					this.open = 1;
+					this.opening = false;
+				}
+			}
+
+			if (this.closing) {
+				if (this.open > 0) {
+					this.open -= 0.05;
+				} else {
+					this.open = 0;
+					this.closing = false;
+				}
+			}
+		});
+
 		this.id = id;
 
 		this.color = color;
@@ -419,7 +439,8 @@ function frame() {
 
 			let newents = e.emit("frame", e);
 
-			if (newents) ents = newents;
+			if (newents)
+				ents = newents;
 		}
 		
 		entities = ents;
@@ -459,7 +480,7 @@ function frame() {
 				case "close": {
 					entities.forEach((e) => {
 						if (e.id == tokens[1]) {
-							e.open = 0;
+							e.closing = true;
 						}
 					});
 				} break;
@@ -467,7 +488,7 @@ function frame() {
 				case "open": {
 					entities.forEach((e) => {
 						if (e.id == tokens[1]) {
-							e.open = 1;
+							e.opening = true;
 						}
 					});
 				} break;
