@@ -33,7 +33,7 @@ class Door extends util.Entity {
 				shape: "custom",
 				color: "#aaa",
 				action: () => {
-					drawDoor(blockx * scale + x, blocky * scale + y, this.open);
+					drawDoor(blockx * scale + x, blocky * scale + y, this.open, this.color);
 				},
 			},
 		});
@@ -262,7 +262,7 @@ let levels = [
 			[1, 1, 1, 1, 1],
 		],
 		entities: [
-			new Door(2, 4, 3, "door"),
+			new Door(2, 4, "red", "door"),
 		],
 	},
 	{
@@ -561,15 +561,15 @@ function frame() {
 						ctx.ellipse(e.position.x + e.size.w / 2 + x, e.position.y + e.size.h / 2 + y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
 					if (e.label == "bullet")
 						ctx.ellipse(e.position.x, e.position.y, e.size.w / 2, e.size.h / 2, 0, 0, Math.PI * 2);
+
+					ctx.fillStyle = e.render.color;
+					ctx.fill();
 				} break;
 
 				case "custom": {
 					e.render.action();
 				} break;
 			}
-
-			ctx.fillStyle = e.render.color;
-			ctx.fill();
 
 			if (e.label != "bullet" && e.maxHealth != e.health) {
 				ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
@@ -735,35 +735,59 @@ function spawn(e) {
 	}
 }
 
-function drawDoor(startx, y, open) {
+function drawDoor(startx, y, open, color = "white") {
 	let x;
 
 	let bit = scale / 10;
 
 	x = Math.round(startx - open * (scale / 2));
 
-	ctx.beginPath();
-	ctx.moveTo(x, y);
-	ctx.lineTo(x + bit * 4, y);
-	ctx.lineTo(x + bit * 5, y + bit);
-	ctx.lineTo(x + bit * 5, y + scale - bit);
-	ctx.lineTo(x + bit * 4, y + scale);
-	ctx.lineTo(x, y + scale);
-	ctx.lineTo(x, y);
-	ctx.fill();
+	{ // draw door first half
+		ctx.fillStyle = "#aaa";
 
-	x = startx + open * (scale / 2);
+		ctx.beginPath();
+		ctx.moveTo(x, y);
+		ctx.lineTo(x + bit * 4, y);
+		ctx.lineTo(x + bit * 5, y + bit);
+		ctx.lineTo(x + bit * 5, y + scale - bit);
+		ctx.lineTo(x + bit * 4, y + scale);
+		ctx.lineTo(x, y + scale);
+		ctx.lineTo(x, y);
+		ctx.fill();
+	}
 
-	ctx.beginPath();
-	ctx.moveTo(x, y);
-	ctx.lineTo(x + bit * 6, y);
-	ctx.lineTo(x + scale, y);
-	ctx.lineTo(x + scale, y + scale);
-	ctx.lineTo(x + bit * 6, y + scale);
-	ctx.lineTo(x + bit * 5, y + scale - bit);
-	ctx.lineTo(x + bit * 5, y + bit);
-	ctx.lineTo(x + bit * 6, y);
-	ctx.fill();
+	{ // draw color first half
+		ctx.fillStyle = colors[color]
+
+		ctx.beginPath();
+		ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(90), 0, Math.PI);
+		ctx.fill();
+	}
+
+	x = Math.round(startx + open * (scale / 2));
+
+	{ // draw door second half
+		ctx.fillStyle = "#aaa";
+
+		ctx.beginPath();
+		ctx.moveTo(x, y);
+		ctx.lineTo(x + bit * 6, y);
+		ctx.lineTo(x + scale, y);
+		ctx.lineTo(x + scale, y + scale);
+		ctx.lineTo(x + bit * 6, y + scale);
+		ctx.lineTo(x + bit * 5, y + scale - bit);
+		ctx.lineTo(x + bit * 5, y + bit);
+		ctx.lineTo(x + bit * 6, y);
+		ctx.fill();
+	}
+
+	{ // draw color second half
+		ctx.fillStyle = colors[color]
+
+		ctx.beginPath();
+		ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(-90), 0, Math.PI);
+		ctx.fill();
+	}
 }
 
 function angle(cx, cy, ex, ey) {
