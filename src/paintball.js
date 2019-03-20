@@ -284,27 +284,6 @@ let levels = [
 			new Door(2, 4, "red", "door"),
 		],
 	},
-	{
-		name: "Maze",
-		map: [
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 5, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1],
-			[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-			[1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		],
-		entities: [
-			new Enemy(scale * 2, scale * 2, { health: 10 }),
-		],
-	}
 ]
 
 let currentMap = 0;
@@ -667,15 +646,7 @@ function frame() {
 	ctx.closePath();
 	ctx.fill();
 
-	let mangle = angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y);
-	let rays = [
-		raycast(canvas.width / 2, canvas.height / 2, mangle - util.toRad(20), 200),
-		raycast(canvas.width / 2, canvas.height / 2, mangle - util.toRad(10), 200),
-		raycast(canvas.width / 2, canvas.height / 2, mangle, 200),
-		raycast(canvas.width / 2, canvas.height / 2, mangle + util.toRad(10), 200),
-		raycast(canvas.width / 2, canvas.height / 2, mangle + util.toRad(20), 200),
-	]
-
+	let rays = dishcast(canvas.width / 2, canvas.height / 2, angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y), 200);
 	ctx.beginPath();
 	ctx.moveTo(canvas.width / 2, canvas.height / 2);
 
@@ -833,7 +804,21 @@ function drawDoor(startx, y, open, color = "white") {
 	}
 }
 
-function raycast(x, y, angle, maxdist = 100, resolution = 2) {
+function dishcast(x, y, angle, maxdist, resolution) {
+	let rays = [];
+
+	for (let i = 10; i > 0; i--) {
+		rays.push(raycast(x, y, angle - util.toRad(5 * i), maxdist, resolution));
+	}
+
+	for (let i = 1; i < 11; i++) {
+		rays.push(raycast(x, y, angle + util.toRad(5 * i), maxdist, resolution));
+	}
+
+	return rays;
+}
+
+function raycast(x, y, angle, maxdist = 100, resolution = 13) {
 	let pos = new util.Point(x, y);
 
 	while (!isColliding([pos])) {
