@@ -234,15 +234,36 @@ document.addEventListener("mousemove", (e) => {
 // map variables
 // 0  air
 // 1  wall
-// 2  white wall
-// 3  red wall
-// 4  yellow wall
 // 5  spawnpoint
 // 6  finish
 // 10 white wool
 // 11 red wool
 // 12 yellow wool
 let levels = [
+	{
+		name: "Blank Test Map",
+		map: [
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 1, 0, 1, 0, 1, 0, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 1, 0, 5, 0, 1, 0, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		]
+	},
+	{
+		name: "Intro",
+		map: [
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 5, 0, 0, 0, 6, 0, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+		],
+	},
 	{
 		name: "Intro",
 		behavior: [
@@ -264,7 +285,7 @@ let levels = [
 		],
 	},
 	{
-		name: "Test Map",
+		name: "Maze",
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
@@ -301,6 +322,8 @@ selectMap(0);
 			case "KeyS": movdn = true; break;
 			case "KeyA": movlt = true; break;
 			case "KeyD": movrt = true; break;
+
+			case "KeyK": selectMap(currentMap); break;
 
 			case "KeyR": {
 				let weapon = weapons[selectedWeapon];
@@ -786,6 +809,17 @@ function drawDoor(startx, y, open, color = "white") {
 		ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(-90), 0, Math.PI);
 		ctx.fill();
 	}
+}
+
+function raycast(x, y, angle) {
+	let pos = new util.Point(x, y);
+
+	while (!isColliding([pos])) {
+		pos.x += 8 * Math.cos(angle);
+		pos.y += 8 * Math.sin(angle);
+	}
+
+	return pos;
 }
 
 function angle(cx, cy, ex, ey) {
