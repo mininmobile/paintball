@@ -266,16 +266,6 @@ let levels = [
 	},
 	{
 		name: "Intro",
-		map: [
-			[1, 1, 1, 1, 1, 1, 1, 1, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 5, 0, 0, 0, 6, 0, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1],
-		]
-	},
-	{
-		name: "Intro",
 		behavior: [
 			"if 6 2 == 11 > open door > close door",
 		],
@@ -674,6 +664,28 @@ function frame() {
 	ctx.fillStyle = "#ddd";
 	ctx.beginPath();
 	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
+	ctx.closePath();
+	ctx.fill();
+
+	let mangle = angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y);
+	let rays = [
+		raycast(canvas.width / 2, canvas.height / 2, mangle - util.toRad(20), 200),
+		raycast(canvas.width / 2, canvas.height / 2, mangle - util.toRad(10), 200),
+		raycast(canvas.width / 2, canvas.height / 2, mangle, 200),
+		raycast(canvas.width / 2, canvas.height / 2, mangle + util.toRad(10), 200),
+		raycast(canvas.width / 2, canvas.height / 2, mangle + util.toRad(20), 200),
+	]
+
+	ctx.beginPath();
+	ctx.moveTo(canvas.width / 2, canvas.height / 2);
+
+	rays.forEach((ray) => {
+		ctx.lineTo(ray.x, ray.y);
+	});
+
+	ctx.lineTo(canvas.width / 2, canvas.height / 2);
+
+	ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
 	ctx.fill();
 }
 
@@ -821,12 +833,15 @@ function drawDoor(startx, y, open, color = "white") {
 	}
 }
 
-function raycast(x, y, angle) {
+function raycast(x, y, angle, maxdist = 100, resolution = 2) {
 	let pos = new util.Point(x, y);
 
 	while (!isColliding([pos])) {
-		pos.x += 8 * Math.cos(angle);
-		pos.y += 8 * Math.sin(angle);
+		pos.x += resolution * Math.cos(angle);
+		pos.y += resolution * Math.sin(angle);
+
+		if (distance(x, y, pos.x, pos.y) > maxdist)
+			break;
 	}
 
 	return pos;
@@ -834,6 +849,13 @@ function raycast(x, y, angle) {
 
 function angle(cx, cy, ex, ey) {
 	return Math.atan2(ey - cy, ex - cx);
+}
+
+function distance(cx, cy, ex, ey) {
+	let a = cx - ex;
+	let b = cy - ey;
+
+	return Math.sqrt(a * a + b * b);
 }
 
 function em(x = 1) {
