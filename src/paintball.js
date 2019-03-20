@@ -11,8 +11,8 @@ const colors = {
 }
 
 class Enemy extends util.Entity {
-	constructor(x, y, options = {}) {
-		super(x, y, scale / 1.25, scale / 1.25, options);
+	constructor(ex, ey, options = {}) {
+		super(ex, ey, scale / 1.25, scale / 1.25, options);
 
 		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
@@ -21,6 +21,14 @@ class Enemy extends util.Entity {
 			this.health--;
 
 			return this.health <= 0;
+		});
+
+		this.on("frame", () => {
+			this.angle += util.toRad(1);
+
+			drawDishcast(this.position.x - x, this.position.y - y,
+				dishcast(this.position.x - x, this.position.y - y,
+					this.angle, 200));
 		});
 	}
 }
@@ -241,7 +249,18 @@ document.addEventListener("mousemove", (e) => {
 // 12 yellow wool
 let levels = [
 	{
-		name: "Blank Test Map",
+		map: [
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 0, 5, 0, 0, 0, 0, 0, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1],
+		],
+		entities: [
+			new Enemy(6 * scale, 2 * scale),
+		],
+	},
+	{
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -255,7 +274,6 @@ let levels = [
 		]
 	},
 	{
-		name: "Intro",
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -265,7 +283,6 @@ let levels = [
 		],
 	},
 	{
-		name: "Intro",
 		behavior: [
 			"if 6 2 == 11 > open door > close door",
 		],
@@ -645,19 +662,6 @@ function frame() {
 	ctx.ellipse(canvas.width / 2, canvas.height / 2, scale / 2.5, scale / 2.5, 0, 0, Math.PI * 2);
 	ctx.closePath();
 	ctx.fill();
-
-	let rays = dishcast(canvas.width / 2, canvas.height / 2, angle(canvas.width / 2, canvas.height / 2, mouse.x, mouse.y), 200);
-	ctx.beginPath();
-	ctx.moveTo(canvas.width / 2, canvas.height / 2);
-
-	rays.forEach((ray) => {
-		ctx.lineTo(ray.x, ray.y);
-	});
-
-	ctx.lineTo(canvas.width / 2, canvas.height / 2);
-
-	ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
-	ctx.fill();
 }
 
 function isColliding(points, player = false) {
@@ -802,6 +806,20 @@ function drawDoor(startx, y, open, color = "white") {
 		ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(-90), 0, Math.PI);
 		ctx.fill();
 	}
+}
+
+function drawDishcast(x, y, rays) {
+	ctx.beginPath();
+	ctx.moveTo(x, y);
+
+	rays.forEach((ray) => {
+		ctx.lineTo(ray.x, ray.y);
+	});
+
+	ctx.lineTo(x, y);
+
+	ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+	ctx.fill();
 }
 
 function dishcast(x, y, angle, maxdist, resolution) {

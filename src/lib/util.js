@@ -49,7 +49,7 @@
 		/**
 		 * Add an event listener.
 		 * @param {"frame"} event
-		 * @param {(event, error: string) => {}} callback 
+		 * @param {() => {}} callback 
 		 */
 		on(event, callback) {
 			this.events.push({
