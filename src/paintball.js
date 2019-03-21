@@ -17,6 +17,18 @@ class Enemy extends util.Entity {
 		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
 		this.angle = util.toRad(options.rotate) || 0;
+		
+		if (options.path) {
+			this.path = util.pathToPoints(options.path).map(p => ({ x: p.x * scale, y: p.y * scale }));
+		} else {
+			this.path = [new util.Point(ex * scale, ey * scale)];
+		}
+
+		this.pathdata = {
+			index: 0,
+			lastpos: this.path[0],
+			newpos: this.path[1] || this.path[0],
+		}
 
 		this.on("shot", () => {
 			this.health--;
@@ -25,11 +37,43 @@ class Enemy extends util.Entity {
 		});
 
 		this.on("frame", () => {
-			let rayx = this.position.x + this.size.w / 2 + x;
-			let rayy = this.position.y + this.size.h / 2 + y;
+			{ // patrol
+				let p1 = this.pathdata.lastpos;
+				let p2 = this.pathdata.newpos;
 
-			drawDishcast(rayx, rayy,
-				dishcast(rayx, rayy, this.angle, 200, undefined, this.id));
+				if (!util.comparePoints(p1, p2)) {
+					if (!util.comparePoints(this.position, p2)) {
+						if (Math.sin(Math.round(util.toDeg(angle(p1.x, p1.y, p2.x, p2.y)))) != Math.sin(Math.round(util.toDeg(this.angle)))) {
+							if (angle(p1.x, p1.y, p2.x, p2.y) < 0) {
+								this.angle += util.toRad(-1.5);
+							} else {
+								this.angle += util.toRad(1.5);
+							}
+						} else {
+							this.position.x += 2 * Math.cos(this.angle);
+							this.position.y += 2 * Math.sin(this.angle);
+						}
+					} else {
+						this.pathdata.index++;
+						let i = this.pathdata.index;
+
+						if (!this.path[i]) {
+							this.pathdata.index = i = 0;
+						}
+
+						this.pathdata.lastpos = this.path[i];
+						this.pathdata.newpos = this.path[i + 1] || this.path[0];
+					}
+				}
+			}
+
+			{ // vision cone
+				let rayx = this.position.x + this.size.w / 2 + x;
+				let rayy = this.position.y + this.size.h / 2 + y;
+	
+				drawDishcast(rayx, rayy,
+					dishcast(rayx, rayy, this.angle, 200, undefined, this.id));
+			}
 		});
 	}
 }
@@ -267,8 +311,8 @@ let levels = [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 		],
 		entities: [
-			new Enemy(2, 2, { health: 10, rotate: 90 }),
-			new Enemy(10, 6, { health: 10, rotate: -90 }),
+			new Enemy(2, 2, { health: 10, rotate: 90, path: ["2 2", "2 4"] }),
+			new Enemy(10, 6, { health: 10, rotate: -90, path: ["10 6", "10 2"] }),
 			new Door(12, 7, "red", "door", true),
 		],
 	},

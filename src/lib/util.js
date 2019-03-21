@@ -75,6 +75,29 @@
 		}
 	}
 
+	let pathToPoints = (p) => {
+		let path = [];
+
+		p.forEach((x) => {
+			let y = x.split(" ").map(v => parseInt(v));
+			path.push(new Point(y[0], y[1]));
+		});
+
+		return path;
+	}
+
+	let comparePoints = (p1, p2) => {
+		if (p1.w) {
+			return p1.w == p2.w && p1.h == p2.h;
+		} else {
+			return p1.x == p2.x && p1.y == p2.y;
+		}
+	}
+
+	let last = (a) => {
+		return a[a.length - 1]
+	}
+
 	let toDeg = (rad) => {
 		return rad * (180 / Math.PI);
 	}
@@ -94,6 +117,9 @@
 					NextID: NextID,
 					toDeg: toDeg,
 					toRad: toRad,
+					last: last,
+					pathToPoints: pathToPoints,
+					comparePoints: comparePoints,
 					Entity: Entity,
 					Point: Point,
 				}
