@@ -26,9 +26,11 @@ class Enemy extends util.Entity {
 		this.on("frame", () => {
 			this.angle += util.toRad(1);
 
-			drawDishcast(this.position.x - x, this.position.y - y,
-				dishcast(this.position.x - x, this.position.y - y,
-					this.angle, 200));
+			let rayx = this.position.x + this.size.w / 2 + x;
+			let rayy = this.position.y + this.size.h / 2 + y;
+
+			drawDishcast(rayx, rayy,
+				dishcast(rayx, rayy, this.angle, 200, undefined, this.id));
 		});
 	}
 }
@@ -252,7 +254,7 @@ let levels = [
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 5, 0, 0, 0, 0, 0, 1],
+			[1, 0, 5, 0, 1, 0, 0, 0, 1],
 			[1, 0, 0, 0, 0, 0, 0, 0, 1],
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
 		],
@@ -664,7 +666,7 @@ function frame() {
 	ctx.fill();
 }
 
-function isColliding(points, player = false) {
+function isColliding(points, player = false, ignore = -1) {
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			let blocktype = map[i][j];
@@ -708,7 +710,7 @@ function isColliding(points, player = false) {
 			}
 		});
 
-		if (colliding)
+		if (colliding && e.id != ignore)
 			return e;
 	}
 }
@@ -822,7 +824,7 @@ function drawDishcast(x, y, rays) {
 	ctx.fill();
 }
 
-function dishcast(x, y, angle, maxdist, resolution) {
+function dishcast(x, y, angle, maxdist, resolution, ignore) {
 	let rays = [];
 
 	for (let i = 10; i > 0; i--) {
@@ -836,10 +838,10 @@ function dishcast(x, y, angle, maxdist, resolution) {
 	return rays;
 }
 
-function raycast(x, y, angle, maxdist = 100, resolution = 13) {
+function raycast(x, y, angle, maxdist = 100, resolution = 13, ignore = -1) {
 	let pos = new util.Point(x, y);
 
-	while (!isColliding([pos])) {
+	while (!isColliding([pos], false, ignore)) {
 		pos.x += resolution * Math.cos(angle);
 		pos.y += resolution * Math.sin(angle);
 
