@@ -12,12 +12,12 @@ const colors = {
 
 class Enemy extends util.Entity {
 	constructor(ex, ey, options = {}) {
-		super(ex, ey, scale / 1.25, scale / 1.25, options);
+		super(ex * scale, ey * scale, scale / 1.25, scale / 1.25, options);
 
 		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
 
-		this.on("shot", (bullet) => {
+		this.on("shot", () => {
 			this.health--;
 
 			return this.health <= 0;
@@ -34,15 +34,25 @@ class Enemy extends util.Entity {
 }
 
 class Door extends util.Entity {
-	constructor(blockx, blocky, color, id, open = 0) {
+	constructor(blockx, blocky, color, id, vertical = false, open = 0) {
 		super(blockx * scale, blocky * scale, scale, scale, {
 			label: "door",
 			render: {
 				shape: "custom",
 				action: () =>
-					drawDoor(blockx * scale + x, blocky * scale + y, this.open, this.color),
+					drawDoor(blockx * scale + x, blocky * scale + y, this.open, this.color, this.vertical),
 			},
 		});
+
+		this.id = id;
+
+		this.color = color;
+
+		this.vertical = vertical;
+
+		this.open = open;
+		this.opening = false;
+		this.closing = false;
 
 		this.on("collide", () => {
 			if (this.open == 0) {
@@ -71,14 +81,6 @@ class Door extends util.Entity {
 				}
 			}
 		});
-
-		this.id = id;
-
-		this.color = color;
-
-		this.open = open;
-		this.opening = false;
-		this.closing = false;
 	}
 }
 
@@ -249,17 +251,25 @@ document.addEventListener("mousemove", (e) => {
 // 12 yellow wool
 let levels = [
 	{
+		behavior: [
+			"if 2 6 == 11 > open door > close door",
+		],
 		map: [
-			[1, 1, 1, 1, 1, 1, 1, 1, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 1, 0, 1, 0, 1, 0, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 1, 0, 5, 0, 1, 0, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		]
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+			[1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+			[1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+			[1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+			[1, 0, 0, 0, 1, 0, 5, 0, 1, 0, 0, 0, 1],
+			[1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+			[1, 0, 10, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1],
+			[1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 1],
+			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		],
+		entities: [
+			new Enemy(2, 2, { health: 10 }),
+			new Enemy(10, 6, { health: 10 }),
+			new Door(12, 7, "red", "door", true),
+		],
 	},
 	{
 		map: [
@@ -335,8 +345,12 @@ selectMap(0);
 		if (e.button == 0) {
 			weapons[selectedWeapon].shoot();
 		} else if (e.button == 2) {
-			colorVel = 0.15;
-			colorAnimating = true;
+			if (!colorAnimating) {
+				colorVel = 0.15;
+				colorAnimating = true;
+			} else {
+				colorVel = 2;
+			}
 		}
 	});
 
@@ -760,7 +774,7 @@ function spawn(e) {
 	}
 }
 
-function drawDoor(startx, y, open, color = "white") {
+function drawDoor(startx, y, open, color = "white", vertical = false) {
 	let x;
 
 	let bit = scale / 10;
