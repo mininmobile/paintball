@@ -16,6 +16,7 @@ class Enemy extends util.Entity {
 
 		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
+		this.angle = util.toRad(options.rotate) || 0;
 
 		this.on("shot", () => {
 			this.health--;
@@ -266,8 +267,8 @@ let levels = [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 		],
 		entities: [
-			new Enemy(2, 2, { health: 10 }),
-			new Enemy(10, 6, { health: 10 }),
+			new Enemy(2, 2, { health: 10, rotate: 90 }),
+			new Enemy(10, 6, { health: 10, rotate: -90 }),
 			new Door(12, 7, "red", "door", true),
 		],
 	},
@@ -679,11 +680,9 @@ function isColliding(points, player = false, ignore = -1, collidesWithPlayer = f
 				colliding = true;
 			}
 		});
-	
-		ctx.strokeStyle = "#f00";
-		ctx.strokeRect(playerx, playery, scale / 1.25, scale / 1.25);
 
-		if (colliding) return { type: "player" };
+		if (colliding)
+			return { type: "player" };
 	}
 
 	for (let i = 0; i < map.length; i++) {
@@ -857,7 +856,7 @@ function dishcast(x, y, angle, maxdist, resolution, ignore) {
 	return rays;
 }
 
-function raycast(x, y, angle, maxdist = 100, resolution = 13, ignore = -1) {
+function raycast(x, y, angle, maxdist = 100, resolution = 23, ignore = -1) {
 	let pos = new util.Point(x, y);
 
 	while (!isColliding([pos], false, ignore, true)) {
@@ -886,10 +885,6 @@ function em(x = 1) {
 	return x * parseFloat(getComputedStyle(document.body).fontSize);
 }
 
-function selectWeapon(ipos) {
-	// ipos = inventory position
-	selectedWeapon = ipos;
+function selectWeapon(id) {
+	selectedWeapon = id;
 }
-
-// fuck lenovo and their shitty keyboards
-// fuck 'em
