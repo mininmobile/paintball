@@ -24,8 +24,6 @@ class Enemy extends util.Entity {
 		});
 
 		this.on("frame", () => {
-			this.angle += util.toRad(1);
-
 			let rayx = this.position.x + this.size.w / 2 + x;
 			let rayy = this.position.y + this.size.h / 2 + y;
 
@@ -250,18 +248,6 @@ document.addEventListener("mousemove", (e) => {
 // 11 red wool
 // 12 yellow wool
 let levels = [
-	{
-		map: [
-			[1, 1, 1, 1, 1, 1, 1, 1, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 0, 5, 0, 1, 0, 0, 0, 1],
-			[1, 0, 0, 0, 0, 0, 0, 0, 1],
-			[1, 1, 1, 1, 1, 1, 1, 1, 1],
-		],
-		entities: [
-			new Enemy(6 * scale, 2 * scale),
-		],
-	},
 	{
 		map: [
 			[1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -666,7 +652,26 @@ function frame() {
 	ctx.fill();
 }
 
-function isColliding(points, player = false, ignore = -1) {
+function isColliding(points, player = false, ignore = -1, collidesWithPlayer = false) {
+	if (collidesWithPlayer) {
+		let colliding = false;
+
+		let playerx = canvas.width / 2 - scale / 2.5;
+		let playery = canvas.height / 2 - scale / 2.5;
+
+		points.forEach((p) => {
+			if ((p.x >= playerx && p.x <= playerx + scale / 1.25) &&
+			    (p.y >= playery && p.y <= playery + scale / 1.25)) {
+				colliding = true;
+			}
+		});
+	
+		ctx.strokeStyle = "#f00";
+		ctx.strokeRect(playerx, playery, scale / 1.25, scale / 1.25);
+
+		if (colliding) return { type: "player" };
+	}
+
 	for (let i = 0; i < map.length; i++) {
 		for (let j = 0; j < map[i].length; j++) {
 			let blocktype = map[i][j];
@@ -710,7 +715,7 @@ function isColliding(points, player = false, ignore = -1) {
 			}
 		});
 
-		if (colliding && e.id != ignore)
+		if (colliding && e.id !== ignore)
 			return e;
 	}
 }
@@ -828,11 +833,11 @@ function dishcast(x, y, angle, maxdist, resolution, ignore) {
 	let rays = [];
 
 	for (let i = 10; i > 0; i--) {
-		rays.push(raycast(x, y, angle - util.toRad(5 * i), maxdist, resolution));
+		rays.push(raycast(x, y, angle - util.toRad(5 * i), maxdist, resolution, ignore));
 	}
 
 	for (let i = 1; i < 11; i++) {
-		rays.push(raycast(x, y, angle + util.toRad(5 * i), maxdist, resolution));
+		rays.push(raycast(x, y, angle + util.toRad(5 * i), maxdist, resolution, ignore));
 	}
 
 	return rays;
@@ -841,7 +846,7 @@ function dishcast(x, y, angle, maxdist, resolution, ignore) {
 function raycast(x, y, angle, maxdist = 100, resolution = 13, ignore = -1) {
 	let pos = new util.Point(x, y);
 
-	while (!isColliding([pos], false, ignore)) {
+	while (!isColliding([pos], false, ignore, true)) {
 		pos.x += resolution * Math.cos(angle);
 		pos.y += resolution * Math.sin(angle);
 

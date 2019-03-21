@@ -1,5 +1,5 @@
 { // contain stuff
-	let _id = -1;
+	let _id = 0;
 
 	let Point = class {
 		constructor(x, y, isSize = false) {
