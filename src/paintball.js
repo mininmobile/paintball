@@ -14,9 +14,12 @@ class Enemy extends util.Entity {
 	constructor(ex, ey, options = {}) {
 		super(ex * scale, ey * scale, scale / 1.25, scale / 1.25, options);
 
+		this.type = "enemy";
+
 		this.maxHealth = options.health || 1;
 		this.health = options.health || 1;
 		this.angle = util.toRad(options.rotate) || 0;
+		this.patroling = true;
 		
 		if (options.path) {
 			this.path = util.pathToPoints(options.path).map(p => ({ x: p.x * scale, y: p.y * scale }));
@@ -37,7 +40,30 @@ class Enemy extends util.Entity {
 		});
 
 		this.on("frame", () => {
-			{ // patrol
+			let vision;
+
+			{ // vision cone
+				let rayx = this.position.x + this.size.w / 2 + x;
+				let rayy = this.position.y + this.size.h / 2 + y;
+	
+				vision = dishcast(rayx, rayy, this.angle, 200, undefined, this.id);
+
+				drawDishcast(rayx, rayy, vision);
+			}
+
+			{ // detect player
+				vision.forEach((ray) => {
+					if (ray.target.type == "player") {
+						detectedx = canvas.width / 2 - scale / 2.5 - x;
+						detectedy = canvas.height / 2 - scale / 2.5 - y;
+						isDetected = true;
+					}
+				});
+			}
+
+			if (isDetected) {
+				this.angle = angle(this.position.x, this.position.y, detectedx, detectedy);
+			} else if (this.patroling) {
 				let p1 = this.pathdata.lastpos;
 				let p2 = this.pathdata.newpos;
 
@@ -65,14 +91,6 @@ class Enemy extends util.Entity {
 						this.pathdata.newpos = this.path[i + 1] || this.path[0];
 					}
 				}
-			}
-
-			{ // vision cone
-				let rayx = this.position.x + this.size.w / 2 + x;
-				let rayy = this.position.y + this.size.h / 2 + y;
-	
-				drawDishcast(rayx, rayy,
-					dishcast(rayx, rayy, this.angle, 200, undefined, this.id));
 			}
 		});
 	}
@@ -237,7 +255,7 @@ let colorAnimating = false;
 let colorFrame = 0;
 let colorVel = 0;
 
-// movement variabled
+// movement variables
 let velx = 0;
 let vely = 0;
 let playerSpeed = 4;
@@ -252,6 +270,9 @@ let x = 0;
 let y = 0;
 let lastx = x;
 let lasty = y;
+let detectedx = x;
+let detectedy = y;
+let isDetected = false;
 
 // render option variables
 let scale = 60;
@@ -957,16 +978,21 @@ function dishcast(x, y, angle, maxdist, resolution, ignore) {
 
 function raycast(x, y, angle, maxdist = 100, resolution = 23, ignore = -1) {
 	let pos = new util.Point(x, y);
+	let target;
 
-	while (!isColliding([pos], false, ignore, true)) {
+	while (!target) {
 		pos.x += resolution * Math.cos(angle);
 		pos.y += resolution * Math.sin(angle);
 
-		if (distance(x, y, pos.x, pos.y) > maxdist)
+		target = isColliding([pos], false, ignore, true);
+
+		if (distance(x, y, pos.x, pos.y) > maxdist) {
+			target = "maxdist";
 			break;
+		}
 	}
 
-	return pos;
+	return { x: pos.x, y: pos.y, target: target }
 }
 
 function angle(cx, cy, ex, ey) {
