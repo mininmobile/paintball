@@ -849,6 +849,30 @@ function drawDoor(startx, starty, open, color = "white", vertical = false) {
 			ctx.fill();
 		}
 
+		y = Math.round(starty + open * (scale / 2));
+
+		{ // draw door second half
+			ctx.fillStyle = "#aaa";
+
+			ctx.beginPath();
+			ctx.moveTo(x, y + scale / 2);
+			ctx.lineTo(x + bit * 9, y + scale / 2);
+			ctx.lineTo(x + scale, y + bit + scale / 2);
+			ctx.lineTo(x + scale, y + scale);
+			ctx.lineTo(x, y + scale);
+			ctx.lineTo(x, y + bit * 6);
+			ctx.lineTo(x + bit, y + scale / 2);
+			ctx.fill();
+		}
+
+		{ // draw color second half
+			ctx.fillStyle = colors[color];
+
+			ctx.beginPath();
+			ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, 0, 0, Math.PI);
+			ctx.fill();
+		}
+
 		y = Math.round(startx + open * (scale / 2));
 	} else {
 		y = starty;
