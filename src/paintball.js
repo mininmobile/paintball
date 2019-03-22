@@ -817,58 +817,89 @@ function spawn(e) {
 	}
 }
 
-function drawDoor(startx, y, open, color = "white", vertical = false) {
+function drawDoor(startx, starty, open, color = "white", vertical = false) {
 	let x;
+	let y ;
 
 	let bit = scale / 10;
 
-	x = Math.round(startx - open * (scale / 2));
+	if (vertical) {
+		x = startx;
+		y = Math.round(starty - open * (scale / 2));
 
-	{ // draw door first half
-		ctx.fillStyle = "#aaa";
+		{ // draw door first half
+			ctx.fillStyle = "#aaa";
 
-		ctx.beginPath();
-		ctx.moveTo(x, y);
-		ctx.lineTo(x + bit * 4, y);
-		ctx.lineTo(x + bit * 5, y + bit);
-		ctx.lineTo(x + bit * 5, y + scale - bit);
-		ctx.lineTo(x + bit * 4, y + scale);
-		ctx.lineTo(x, y + scale);
-		ctx.lineTo(x, y);
-		ctx.fill();
-	}
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			ctx.lineTo(x + scale, y);
+			ctx.lineTo(x + scale, y + bit * 4);
+			ctx.lineTo(x + scale - bit, y + bit * 5);
+			ctx.lineTo(x + bit, y + bit * 5);
+			ctx.lineTo(x, y + bit * 4);
+			ctx.lineTo(x, y);
+			ctx.fill();
+		}
 
-	{ // draw color first half
-		ctx.fillStyle = colors[color]
+		{ // draw color first half
+			ctx.fillStyle = colors[color];
 
-		ctx.beginPath();
-		ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(90), 0, Math.PI);
-		ctx.fill();
-	}
+			ctx.beginPath();
+			ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, Math.PI, 0, Math.PI);
+			ctx.fill();
+		}
 
-	x = Math.round(startx + open * (scale / 2));
+		y = Math.round(startx + open * (scale / 2));
+	} else {
+		y = starty;
+		x = Math.round(startx - open * (scale / 2));
+		
+		{ // draw door first half
+			ctx.fillStyle = "#aaa";
 
-	{ // draw door second half
-		ctx.fillStyle = "#aaa";
-
-		ctx.beginPath();
-		ctx.moveTo(x, y);
-		ctx.lineTo(x + bit * 6, y);
-		ctx.lineTo(x + scale, y);
-		ctx.lineTo(x + scale, y + scale);
-		ctx.lineTo(x + bit * 6, y + scale);
-		ctx.lineTo(x + bit * 5, y + scale - bit);
-		ctx.lineTo(x + bit * 5, y + bit);
-		ctx.lineTo(x + bit * 6, y);
-		ctx.fill();
-	}
-
-	{ // draw color second half
-		ctx.fillStyle = colors[color]
-
-		ctx.beginPath();
-		ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(-90), 0, Math.PI);
-		ctx.fill();
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			ctx.lineTo(x + bit * 4, y);
+			ctx.lineTo(x + bit * 5, y + bit);
+			ctx.lineTo(x + bit * 5, y + scale - bit);
+			ctx.lineTo(x + bit * 4, y + scale);
+			ctx.lineTo(x, y + scale);
+			ctx.lineTo(x, y);
+			ctx.fill();
+		}
+		
+		{ // draw color first half
+			ctx.fillStyle = colors[color]
+			
+			ctx.beginPath();
+			ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(90), 0, Math.PI);
+			ctx.fill();
+		}
+		
+		x = Math.round(startx + open * (scale / 2));
+		
+		{ // draw door second half
+			ctx.fillStyle = "#aaa";
+			
+			ctx.beginPath();
+			ctx.moveTo(x, y);
+			ctx.lineTo(x + bit * 6, y);
+			ctx.lineTo(x + scale, y);
+			ctx.lineTo(x + scale, y + scale);
+			ctx.lineTo(x + bit * 6, y + scale);
+			ctx.lineTo(x + bit * 5, y + scale - bit);
+			ctx.lineTo(x + bit * 5, y + bit);
+			ctx.lineTo(x + bit * 6, y);
+			ctx.fill();
+		}
+		
+		{ // draw color second half
+			ctx.fillStyle = colors[color]
+			
+			ctx.beginPath();
+			ctx.ellipse(x + scale / 2, y + scale / 2, scale / 6, scale / 6, util.toRad(-90), 0, Math.PI);
+			ctx.fill();
+		}
 	}
 }
 
