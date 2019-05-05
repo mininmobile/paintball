@@ -1,2 +1,2 @@
 # paintball
-A game about paintball.
+A stealth/action/puzzle/adventure/dungeon-crawler game.
