@@ -1,2 +1,2 @@
 # paintball
-A stealth/action/puzzle/adventure/dungeon-crawler game.
+moved to https://codeberg.org/zvava/paintball
